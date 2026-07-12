@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+
+# Base de datos local (SQLite dev)
+*.db
+*.db-journal
+dev.db*
+server/prisma/migrations/dev.db*
+
+# Build output
+web/dist/
+web/build/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <rect width="100" height="100" rx="18" fill="#14110F"/>
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#B23A2E" stroke-width="4.2"/>
+  <circle cx="50" cy="50" r="32" fill="none" stroke="#B23A2E" stroke-width="1.5" stroke-dasharray="2 4"/>
+  <path id="a" d="M 17 50 A 33 33 0 0 1 83 50" fill="none"/>
+  <text font-family="Georgia, serif" font-size="12.5" font-weight="700" letter-spacing="3" fill="#B23A2E">
+    <textPath href="#a" startOffset="50%" text-anchor="middle">FIDELIX</textPath>
+  </text>
+  <path d="M38 55 L46 63 L63 46" stroke="#B23A2E" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,130 @@
+// Esquema de datos - Sello (programa de lealtad retail multi-marca)
+//
+// Dev: SQLite (arranca sin instalar servidor de BD).
+// Prod alto trafico: cambia provider a "postgresql" y la DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // -> "postgresql" en produccion
+  url      = env("DATABASE_URL")
+}
+
+// Una "marca"/negocio = un tenant. Cada marca tiene su espacio y usuarios AISLADOS.
+model Tenant {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  // --- Plan / prueba de 3 dias ---
+  plan         String    @default("TRIAL") // TRIAL | ACTIVE | EXPIRED
+  trialEndsAt  DateTime?
+  // --- Personalizacion (branding) que hace el dueño ---
+  logo         String    @default("") // URL o dataURL del logo
+  primaryColor String    @default("#6d5efc")
+  accentColor  String    @default("#e0b877")
+  emoji        String    @default("🎁")
+  description  String    @default("")
+  supportEmail String    @default("")
+  supportPhone String    @default("")
+  createdAt    DateTime  @default(now())
+
+  users    User[]
+  programs Program[]
+
+  @@index([plan])
+}
+
+// Roles: SUPERADMIN (Movix/Royner), ADMIN (dueño de la marca), STAFF (caja), CUSTOMER.
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          String    @default("CUSTOMER") // SUPERADMIN | ADMIN | STAFF | CUSTOMER
+  tenantId      String?
+  tenant        Tenant?   @relation(fields: [tenantId], references: [id])
+  // --- Verificacion de correo por codigo ---
+  emailVerified Boolean   @default(false)
+  verifyCode    String?
+  verifyExpires DateTime?
+  createdAt     DateTime  @default(now())
+
+  cards        Card[]
+  transactions Transaction[] @relation("StaffTransactions")
+
+  @@index([tenantId])
+  @@index([role])
+}
+
+// Programa de lealtad configurable por el ADMIN.
+model Program {
+  id          String   @id @default(cuid())
+  code        String   @unique // codigo corto para que el cliente se inscriba (ej: CAFE10)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  name        String
+  description String   @default("")
+  type        String   @default("STAMP") // STAMP (sellos) | POINTS (puntos)
+  goal        Int      @default(10)
+  rewardText  String   @default("Recompensa gratis")
+  emoji       String   @default("⭐")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cards Card[]
+
+  @@index([tenantId])
+  @@index([active])
+}
+
+// Tarjeta de lealtad de un cliente dentro de un programa.
+model Card {
+  id          String    @id @default(cuid())
+  programId   String
+  program     Program   @relation(fields: [programId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  token       String    @unique // valor que va en el QR
+  balance     Int       @default(0)
+  status      String    @default("ACTIVE") // ACTIVE | COMPLETED | REDEEMED | ARCHIVED
+  completedAt DateTime?
+  redeemedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  transactions Transaction[]
+  redemptions  Redemption[]
+
+  @@unique([programId, userId])
+  @@index([status])
+  @@index([redeemedAt])
+  @@index([token])
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  staffId   String?
+  staff     User?    @relation("StaffTransactions", fields: [staffId], references: [id])
+  delta     Int
+  reason    String   @default("scan")
+  createdAt DateTime @default(now())
+
+  @@index([cardId])
+  @@index([createdAt])
+}
+
+model Redemption {
+  id        String   @id @default(cuid())
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  staffId   String?
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([cardId])
+}
