@@ -1,0 +1,353 @@
+<title>Fidelix by Movix · Presentación del proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14110f; --ink2:#1c1814; --paper:#efe7d8; --paper-dim:#e2d8c4;
+    --brick:#b23a2e; --brick2:#d0503f; --bronze:#9c7a3c; --pine:#3d6b57;
+    --muted:#a89a83; --line:#332c22; --paper-ink:#2a2318; --paper-muted:#6b6250;
+    --display:"Fraunces",Georgia,"Times New Roman",serif;
+    --body:"Work Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ink);color:var(--paper);font-family:var(--body);margin:0;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .deck{max-width:920px;margin:0 auto;padding:40px 20px 80px;display:flex;flex-direction:column;gap:44px}
+
+  /* Cada lámina es un boleto de papel */
+  .slide{background:var(--paper);color:var(--paper-ink);border-radius:8px;position:relative;box-shadow:0 22px 50px rgba(0,0,0,.45)}
+  .slide::before{content:"";display:block;height:14px;border-radius:8px 8px 0 0;
+    background-image:radial-gradient(circle at 10px 7px,var(--ink) 6px,transparent 6.5px);
+    background-size:20px 14px;background-repeat:repeat-x}
+  .slide-body{padding:30px 40px 36px}
+  @media(max-width:640px){.slide-body{padding:22px 22px 28px}}
+  .slide-no{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--bronze);text-transform:uppercase;display:flex;justify-content:space-between;border-bottom:1px dashed #b7a98d;padding-bottom:10px;margin-bottom:20px}
+  h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.08;margin:0}
+  h2{font-size:clamp(24px,3.6vw,34px);font-weight:700;margin-bottom:14px}
+  h3{font-size:18px;margin:18px 0 6px}
+  p{margin:8px 0;max-width:68ch}
+  .muted{color:var(--paper-muted)}
+  .tiny{font-size:12.5px}
+  strong{color:var(--brick)}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:5px 0}
+
+  /* Portada — única lámina oscura: tinta sobre tinta */
+  .cover{background:var(--ink2);color:var(--paper);text-align:center}
+  .cover::before{background-image:radial-gradient(circle at 10px 7px,var(--ink) 6px,transparent 6.5px)}
+  .cover .slide-body{padding:60px 40px 64px}
+  .cover h1{font-size:clamp(40px,7vw,64px);font-weight:700;letter-spacing:-1px}
+  .cover .em{font-style:italic;color:var(--brick2);font-weight:500}
+  .seal{width:96px;height:96px;margin:0 auto 22px;display:block;color:var(--brick)}
+  .cover .sub{color:var(--muted);font-size:17px;max-width:52ch;margin:14px auto 0}
+  .cover .meta{font-family:var(--mono);font-size:12px;color:var(--bronze);letter-spacing:2px;text-transform:uppercase;margin-top:26px}
+
+  /* Tablas: números en mono, alineados */
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--paper-muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--paper-ink)}
+  td{padding:9px 10px;border-bottom:1px solid #d5c9ae;vertical-align:top}
+  td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.total td{border-top:2px solid var(--paper-ink);border-bottom:none;font-weight:600}
+  .pos{color:var(--pine);font-weight:600}
+  .neg{color:var(--brick)}
+  .tblwrap{overflow-x:auto}
+  .src{font-size:11.5px;color:var(--paper-muted);font-family:var(--mono);margin-top:4px}
+
+  /* Grids de tarjetitas */
+  .grid{display:grid;gap:12px;margin:16px 0}
+  .g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:640px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+  .cell{background:rgba(0,0,0,.045);border-radius:8px;padding:14px}
+  .cell b{display:block;font-family:var(--display);font-size:15.5px;margin-bottom:4px}
+  .cell p{font-size:13px;margin:0;color:var(--paper-muted)}
+  .stat{background:rgba(0,0,0,.045);border-radius:8px;padding:16px;text-align:center}
+  .stat b{display:block;font-family:var(--mono);font-size:30px;color:var(--brick);font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--paper-muted)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-left:6px;vertical-align:2px}
+  .pill.ok{background:var(--pine);color:#eafff5}
+  .pill.pend{background:#c9b98f;color:#3d3115}
+  .pill.brick{background:var(--brick);color:#fdf6ec}
+
+  .callout{border-left:4px solid var(--brick);background:rgba(178,58,46,.07);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+  .callout.green{border-color:var(--pine);background:rgba(61,107,87,.08)}
+  .foot{font-family:var(--mono);font-size:11px;color:var(--paper-muted);border-top:1px dashed #b7a98d;margin-top:22px;padding-top:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+
+  @media print{
+    body{background:#fff}
+    .deck{gap:0;padding:0;max-width:none}
+    .slide{box-shadow:none;border-radius:0;page-break-after:always;border:1px solid #ddd}
+    .slide::before{display:none}
+  }
+</style>
+
+<div class="deck">
+
+  <!-- 01 · PORTADA -->
+  <section class="slide cover">
+    <div class="slide-body">
+      <svg class="seal" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="4.5"/>
+        <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 4"/>
+        <path d="M40 56 L47 63 L61 47" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1>Fidelix</h1>
+      <p class="sub">El sello digital que hace que los clientes <span class="em">vuelvan</span>. Plataforma de programas de lealtad para comercios de Costa Rica.</p>
+      <div class="meta">by Movix · @fidelixbymovix · 2026 · Confidencial</div>
+    </div>
+  </section>
+
+  <!-- 02 · OPORTUNIDAD -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>02 · La oportunidad</span><span>Fidelix</span></div>
+      <h2>Retener es el negocio que los comercios no están haciendo.</h2>
+      <div class="grid g3">
+        <div class="stat"><b>7/10</b><span>clientes que visitan un comercio no regresan*</span></div>
+        <div class="stat"><b>5–25×</b><span>más caro adquirir un cliente nuevo que retener uno</span></div>
+        <div class="stat"><b>₡0</b><span>lo que hoy invierte en retención la mayoría de PYMEs ticas</span></div>
+      </div>
+      <p>La herramienta actual del comercio tico es la <strong>tarjeta de cartón</strong>: se pierde, se moja, no genera datos y nadie la administra. Las plataformas serias existen — pero apuntan a corporaciones o meten al comercio dentro de una app ajena.</p>
+      <p class="src">*Dato usado por la propia industria de lealtad en CR (Bee Loyal). Rango de costo de adquisición: benchmarks estándar de retención (Bain/HBR).</p>
+    </div>
+  </section>
+
+  <!-- 03 · PRODUCTO -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>03 · El producto</span><span>Fidelix</span></div>
+      <h2>Un programa de lealtad con la marca del comercio, listo en minutos.</h2>
+      <p>Fidelix es una plataforma web (sin apps que instalar) donde cada comercio crea su programa de sellos o puntos, con su logo y sus colores. El cliente final lleva su boleto digital con QR en el teléfono.</p>
+      <div class="grid g4">
+        <div class="cell"><b>1 · Creá tu marca</b><p>Logo, colores y recompensas en minutos.</p></div>
+        <div class="cell"><b>2 · Compartí el código</b><p>Tus clientes entran con un código corto o QR.</p></div>
+        <div class="cell"><b>3 · Sumá en caja</b><p>Escaneás su tarjeta y el sello cae al instante.</p></div>
+        <div class="cell"><b>4 · Fidelizá</b><p>Premio canjeado… y vuelven por el siguiente.</p></div>
+      </div>
+      <div class="grid g4">
+        <div class="cell"><b>Marca propia</b><p>El cliente ve TU marca, no la nuestra.</p></div>
+        <div class="cell"><b>QR + Wallet</b><p>Boleto digital; pase para Apple/Google Wallet.</p></div>
+        <div class="cell"><b>Estadísticas en vivo</b><p>Clientes, canjes y retención al instante.</p></div>
+        <div class="cell"><b>Reportes mensuales</b><p>Resumen automático con la marca del comercio.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · DATOS DEL COMERCIO -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>04 · Los datos</span><span>Fidelix</span></div>
+      <h2>Cada comercio es dueño de su base de clientes.</h2>
+      <ul>
+        <li><strong>Aislamiento por marca:</strong> cada comercio vive en su propio espacio; ningún negocio ve los datos de otro. Solo el comercio y Movix (operador) tienen acceso.</li>
+        <li><strong>Panel propio:</strong> el dueño entra con su usuario y ve clientes, progreso de tarjetas, canjes y estadísticas. Puede registrar clientes manualmente en mostrador (con QR y credenciales generadas al momento).</li>
+        <li><strong>Reporte mensual automático:</strong> el primer día de cada mes recibe por correo un resumen con su logo y sus colores: clientes nuevos, sellos entregados, canjes y tasa de retención.</li>
+        <li><strong>Seguridad por capas (OWASP):</strong> contraseñas cifradas (bcrypt), sesiones JWT, verificación de correo por código, límites anti fuerza bruta, validación estricta de entradas y consultas parametrizadas (sin inyección SQL).</li>
+      </ul>
+      <div class="callout"><b>Honestidad técnica:</b> ningún sistema es 100% inhackeable. Fidelix aplica los estándares de la industria y, en producción, se suma HTTPS + firewall de infraestructura (Cloudflare/WAF).</div>
+    </div>
+  </section>
+
+  <!-- 05 · COMPETENCIA -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>05 · Competencia</span><span>Fidelix</span></div>
+      <h2>El punto medio que falta en el mercado tico.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th></th><th>Tarjeta de cartón</th><th>Bee Loyal (CR)</th><th>Lealto (CR)</th><th>Fidelix</th></tr>
+        <tr><td><b>Enfoque</b></td><td>—</td><td>Masivo: +2,500 negocios dentro de la app de Bee</td><td>Corporativo/enterprise, 14 países, módulos e integraciones POS/CRM/ERP</td><td><b>PYME con marca propia</b></td></tr>
+        <tr><td><b>Marca</b></td><td>La tuya (en papel)</td><td>La de Bee — tu negocio es una tarjeta más en su app</td><td>White-label total</td><td><b>White-label accesible</b></td></tr>
+        <tr><td><b>Precio público</b></td><td>~₡0</td><td>No publica (venta por WhatsApp)</td><td>No publica (demo estratégica)</td><td><b>Desde $49/mes, transparente</b></td></tr>
+        <tr><td><b>Datos del negocio</b></td><td>Ninguno</td><td>Base de datos propia (dentro de Bee)</td><td>Sí, con integración</td><td><b>Panel + reportes con tu marca</b></td></tr>
+        <tr><td><b>Implementación</b></td><td>Imprimir</td><td>Autoservicio</td><td>Proyecto (semanas/meses)</td><td><b>Días + video de lanzamiento (Movix)</b></td></tr>
+      </table>
+      </div>
+      <p><strong>Posicionamiento:</strong> Bee te mete en <em>su</em> app; Lealto es para corporaciones. Fidelix es <em>tu</em> programa, con <em>tu</em> marca, a precio de PYME — y con la producción audiovisual de Movix para lanzarlo.</p>
+      <p class="src">Fuente: sitios públicos de lealto.com y beeloyalcard.com (jul 2026).</p>
+    </div>
+  </section>
+
+  <!-- 06 · MODELO DE NEGOCIO -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>06 · Modelo de negocio</span><span>Fidelix</span></div>
+      <h2>Suscripción mensual + fee de implementación.</h2>
+      <div class="grid g2">
+        <div class="cell"><b>SaaS mensual (recurrente)</b><p>3 planes según tamaño del comercio. Descuento del 20% en pago anual, que adelanta flujo de caja.</p></div>
+        <div class="cell"><b>Fee de implementación: $250 (₡113,400)</b><p>Única vez. Incluye diseño de los pases digitales, subdominio propio (club.sumarca.com) y un video UGC directo a cámara para lanzar el programa — sin B-roll genérico. Es el diferenciador Movix: nadie más lanza tu lealtad con producción audiovisual.</p></div>
+      </div>
+      <div class="callout green">El fee de $250 no es solo ingreso inicial: justifica el valor de agencia y filtra clientes serios.</div>
+    </div>
+  </section>
+
+  <!-- 07 · PLANES -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>07 · Planes y precios</span><span>Fidelix</span></div>
+      <h2>Precios públicos, en dólares y colones.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Plan</th><th>Para quién</th><th class="n">Usuarios</th><th class="n">Mensual</th><th class="n">≈ CRC/mes</th><th class="n">Anual (−20%)</th><th class="n">Margen</th></tr>
+        <tr><td><b>Fidelix Start</b></td><td>Local único: cafeterías, barberías</td><td class="n">500</td><td class="n">$49</td><td class="n">₡22,200</td><td class="n">$470</td><td class="n pos">~71%</td></tr>
+        <tr><td><b>Fidelix Pulse</b> <span class="pill brick">más elegido</span></td><td>Restaurantes, cadenas pequeñas, clínicas</td><td class="n">3,000</td><td class="n">$119</td><td class="n">₡54,000</td><td class="n">$1,142</td><td class="n pos">~76%</td></tr>
+        <tr><td><b>Fidelix Hyper</b></td><td>Franquicias y marcas masivas</td><td class="n">25,000</td><td class="n">$349</td><td class="n">₡158,400</td><td class="n">$3,350</td><td class="n pos">~78%</td></tr>
+        <tr><td><b>Enterprise</b></td><td>+25,000 usuarios: cotización a la medida</td><td class="n">∞</td><td class="n" colspan="4">negociado por volumen</td></tr>
+      </table>
+      </div>
+      <ul class="tiny">
+        <li><b>Start:</b> 1 sucursal · Wallet · IA básica (chatbot de saldo) · reportes mensuales.</li>
+        <li><b>Pulse:</b> 3 sucursales · 2 push/mes · IA interactiva (sugiere el próximo premio) · estadísticas avanzadas.</li>
+        <li><b>Hyper:</b> sucursales ilimitadas · push ilimitado · API con el POS · IA predictiva de demanda.</li>
+      </ul>
+      <p class="src">Tipo de cambio del modelo: ₡453.77/USD. El tope de 25,000 en Hyper protege la infraestructura: arriba de eso, contrato Enterprise.</p>
+    </div>
+  </section>
+
+  <!-- 08 · ECONOMÍA UNITARIA -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>08 · Economía por cliente</span><span>Fidelix</span></div>
+      <h2>Cada cliente Start deja $35 libres al mes.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Costo directo asignado por cliente (plan Start, $49)</th><th class="n">USD/mes</th></tr>
+        <tr><td>Prorrateo de servidor web y base de datos</td><td class="n">$5.00</td></tr>
+        <tr><td>Consumo de IA (respuestas automatizadas estándar)</td><td class="n">$5.00</td></tr>
+        <tr><td>Prorrateo licencia Apple / correos Workspace</td><td class="n">$4.00</td></tr>
+        <tr class="total"><td>Costo directo total</td><td class="n neg">$14.00</td></tr>
+        <tr class="total"><td>Utilidad por cliente Start</td><td class="n pos">$35.00 (71%)</td></tr>
+      </table>
+      </div>
+      <div class="grid g3">
+        <div class="stat"><b>71%</b><span>margen Start ($35 de $49)</span></div>
+        <div class="stat"><b>76%</b><span>margen Pulse (~$90 de $119)</span></div>
+        <div class="stat"><b>78%</b><span>margen Hyper (~$272 de $349)</span></div>
+      </div>
+      <p class="src">Fuente: modelo de rentabilidad Fidelix (doc. interno, 2026). Regla del modelo: el costo directo del plan base nunca supera el 35% del precio.</p>
+    </div>
+  </section>
+
+  <!-- 09 · COSTOS INTERNOS -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>09 · Costos internos (fijos)</span><span>Fidelix</span></div>
+      <h2>La plataforma completa cuesta menos de $80 al mes.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Concepto (plataforma, no por cliente)</th><th class="n">Estimado/mes</th><th>Nota</th></tr>
+        <tr><td>Hosting app + API (Railway/Render/Fly)</td><td class="n">$15–25</td><td>escala con tráfico</td></tr>
+        <tr><td>PostgreSQL gestionado</td><td class="n">$10–15</td><td>respaldo automático</td></tr>
+        <tr><td>Correo transaccional (Resend)</td><td class="n">$0–20</td><td>gratis hasta 3,000 emails/mes</td></tr>
+        <tr><td>Dominio fidelix (.com/.cr)</td><td class="n">$1.25</td><td>$15/año</td></tr>
+        <tr><td>Apple Developer (Wallet)</td><td class="n">$8.25</td><td>$99/año, requerido para pases</td></tr>
+        <tr><td>Google Wallet API</td><td class="n">$0</td><td>sin costo</td></tr>
+        <tr><td>Correo corporativo (Workspace)</td><td class="n">$6–12</td><td>1–2 cuentas</td></tr>
+        <tr class="total"><td>Total fijo mensual</td><td class="n">≈ $40–80</td><td>≈ ₡18,000–36,000</td></tr>
+      </table>
+      </div>
+      <div class="callout green"><b>Punto de equilibrio: 2 clientes Start.</b> Dos clientes del plan más barato ($70 de utilidad directa) ya cubren todos los costos fijos de la plataforma.</div>
+      <p class="src">Estimados a precios públicos de proveedores (jul 2026); se marcan como estimados, no cotizaciones.</p>
+    </div>
+  </section>
+
+  <!-- 10 · COSTOS EXTERNOS -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>10 · Costos externos (variables)</span><span>Fidelix</span></div>
+      <h2>Lo que se va con cada venta — y cómo protegerlo.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Concepto</th><th class="n">Costo</th><th>Impacto en un Start ($49)</th></tr>
+        <tr><td>Cobro con tarjeta / PayPal</td><td class="n">~5.4% + $0.30</td><td class="n neg">−$2.95/mes (−6 pts de margen)</td></tr>
+        <tr><td>Cobro por SINPE / transferencia (CR)</td><td class="n">₡0</td><td class="n pos">margen intacto (71%)</td></tr>
+        <tr><td>Push notifications</td><td class="n">incluido en plan</td><td>limitado por plan (2/mes en Pulse)</td></tr>
+        <tr><td>Soporte al comercio</td><td class="n">tiempo Movix</td><td>FAQ + guías dentro del sitio lo reducen</td></tr>
+      </table>
+      </div>
+      <div class="callout"><b>Recomendación:</b> en Costa Rica, incentivar pago anual por transferencia/SINPE (ya con −20%) y dejar tarjeta/PayPal para clientes internacionales. Cada punto de comisión evitado es margen directo.</div>
+    </div>
+  </section>
+
+  <!-- 11 · ESCENARIOS -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>11 · Proyección</span><span>Fidelix</span></div>
+      <h2>Tres escenarios de cartera.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Escenario</th><th>Mezcla</th><th class="n">MRR</th><th class="n">Costos var.</th><th class="n">Fijos</th><th class="n">Utilidad/mes</th><th class="n">≈ CRC</th><th class="n">Fees (1 vez)</th></tr>
+        <tr><td><b>Semilla</b></td><td>4 Start + 1 Pulse</td><td class="n">$315</td><td class="n">$85</td><td class="n">$60</td><td class="n pos">$170 (54%)</td><td class="n">₡77,000</td><td class="n">$1,250</td></tr>
+        <tr><td><b>Crecimiento</b></td><td>10 Start + 4 Pulse + 1 Hyper</td><td class="n">$1,315</td><td class="n">$331</td><td class="n">$80</td><td class="n pos">$904 (69%)</td><td class="n">₡410,000</td><td class="n">$3,750</td></tr>
+        <tr><td><b>Consolidación</b></td><td>18 Start + 10 Pulse + 2 Hyper</td><td class="n">$2,770</td><td class="n">$691</td><td class="n">$120</td><td class="n pos">$1,959 (71%)</td><td class="n">₡889,000</td><td class="n">$7,500</td></tr>
+      </table>
+      </div>
+      <ul class="tiny">
+        <li>MRR = ingreso mensual recurrente. Los fees de implementación ($250 × cliente) financian la adquisición del siguiente.</li>
+        <li>El margen se sostiene ~70% a escala porque los costos fijos crecen mucho más lento que la cartera.</li>
+        <li>Cifras en colones al tipo de cambio del modelo (₡453.77).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 12 · ESTADO DEL PRODUCTO -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>12 · Estado del producto</span><span>Fidelix</span></div>
+      <h2>Qué está construido y qué falta para cobrar.</h2>
+      <h3>Construido y verificado <span class="pill ok">listo</span></h3>
+      <ul class="tiny">
+        <li>Plataforma multi-marca completa: registro con prueba de 3 días, verificación por código, panel del dueño (estadísticas, programas, personalización de marca, escaneo QR, reportes), panel de cliente final, alta manual en mostrador, panel operador Movix.</li>
+        <li>Sitio público con identidad propia (sello de tinta) y experiencia interactiva: mascota del login, demo estampable, fondo reactivo al mouse, scrollytelling.</li>
+        <li>Seguridad por capas + depuración automática de datos + código versionado en git.</li>
+      </ul>
+      <h3>Para activar cobros y producción <span class="pill pend">pendiente</span></h3>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Activación</th><th class="n">Costo</th><th class="n">Tiempo est.</th></tr>
+        <tr><td>Deploy con dominio + HTTPS + WAF (Cloudflare)</td><td class="n">$15/año + hosting</td><td class="n">1–2 días</td></tr>
+        <tr><td>Correo real (Resend): verificación + reportes</td><td class="n">$0–20/mes</td><td class="n">1 día</td></tr>
+        <tr><td>Pagos: Stripe/PayPal + planes</td><td class="n">% por venta</td><td class="n">2–4 días</td></tr>
+        <tr><td>Login social Google/Apple/Microsoft</td><td class="n">$0 (Apple: usa la cuenta dev)</td><td class="n">1–2 días</td></tr>
+        <tr><td>Wallet real Apple/Google (certificados)</td><td class="n">$99/año (Apple Dev)</td><td class="n">3–5 días</td></tr>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · ROADMAP -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>13 · Roadmap 90 días</span><span>Fidelix</span></div>
+      <h2>De demo a facturación en tres meses.</h2>
+      <div class="grid g3">
+        <div class="cell"><b>Mes 1 · Salir</b><p>Deploy público + correo real + pagos. Piloto con 2 comercios amigos (Kiku/Onyx como caso propio). FAQ y contador de negocios en el sitio (aprendizaje de Bee).</p></div>
+        <div class="cell"><b>Mes 2 · Vender</b><p>Wallet real + login social. Campaña con video UGC (sistema SYK). CTA de WhatsApp en el sitio. Meta: escenario Semilla (5 clientes).</p></div>
+        <div class="cell"><b>Mes 3 · Escalar</b><p>Notificaciones push, referidos entre comercios, testimonios en el sitio (aprendizaje de Lealto). Meta: camino al escenario Crecimiento.</p></div>
+      </div>
+      <div class="callout"><b>Del análisis competitivo al sitio:</b> sumar FAQ, prueba social con número de comercios, la estadística "7 de cada 10 no vuelven" y botón de WhatsApp — patrones que Bee y Lealto ya validaron en el mercado tico.</div>
+    </div>
+  </section>
+
+  <!-- 14 · CIERRE -->
+  <section class="slide">
+    <div class="slide-body">
+      <div class="slide-no"><span>14 · Demo y contacto</span><span>Fidelix</span></div>
+      <h2>Probalo ahora mismo.</h2>
+      <div class="tblwrap">
+      <table>
+        <tr><th>Rol</th><th>Usuario</th><th>Contraseña</th></tr>
+        <tr><td>Operador (Movix)</td><td class="n" style="text-align:left">dueno@movix.com</td><td class="n" style="text-align:left">movix1234</td></tr>
+        <tr><td>Dueño de comercio</td><td class="n" style="text-align:left">admin@kiku.com</td><td class="n" style="text-align:left">kiku1234</td></tr>
+        <tr><td>Cliente final</td><td class="n" style="text-align:left">cliente@kiku.com</td><td class="n" style="text-align:left">cliente1234</td></tr>
+      </table>
+      </div>
+      <p class="tiny muted">Código de programa demo: <b>KIKU10</b> · Entorno local: localhost:5173 (accesos de demostración; en producción se reemplazan).</p>
+      <div class="foot">
+        <span>Fidelix by Movix · @fidelixbymovix</span>
+        <span>Documento confidencial · 2026</span>
+      </div>
+    </div>
+  </section>
+
+</div>
