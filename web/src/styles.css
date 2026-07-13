@@ -439,6 +439,33 @@ h1, h2, h3 { font-family: var(--display); }
 .rm-grid b { font-family: var(--mono); font-size: 24px; color: var(--brick); display: block; }
 .rm-grid span { font-size: 11px; color: #6b6250; }
 
+/* Stat band — el dato duro (7/10) en gigante */
+.stat-band { text-align: center; padding-top: 36px; padding-bottom: 36px; }
+.sb-num { font-family: var(--mono); font-weight: 600; font-size: clamp(72px, 13vw, 150px); line-height: 1; color: var(--brick); letter-spacing: -4px; font-variant-numeric: tabular-nums; }
+.sb-num span { color: var(--muted); font-size: .55em; }
+.sb-line { font-family: var(--display); font-size: clamp(20px, 3vw, 30px); color: var(--paper); margin: 6px 0 4px; }
+.sb-line em { font-style: italic; color: var(--brick-2); }
+.sb-sub { margin: 0 0 22px; }
+
+/* FAQ (landing) */
+.faq-land .faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 720px; margin: 0 auto; }
+.faq-land details { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; padding: 15px 18px; transition: border-color .2s; }
+.faq-land details[open] { border-color: var(--bronze); }
+.faq-land summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--paper); }
+.faq-land summary::-webkit-details-marker { display: none; }
+.faq-x { font-family: var(--mono); color: var(--bronze); font-size: 18px; transition: transform .25s; flex: none; }
+.faq-land details[open] .faq-x { transform: rotate(45deg); }
+.faq-land details p { margin: 10px 0 2px; max-width: 62ch; }
+
+/* Boton flotante de WhatsApp (verde oficial, enmarcado en papel como los logos OAuth) */
+.wa-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 90;
+  width: 54px; height: 54px; border-radius: 50%; background: #25d366;
+  display: grid; place-items: center; border: 3px solid var(--paper);
+  box-shadow: 0 10px 26px rgba(0,0,0,.45); transition: transform .2s;
+}
+.wa-fab:hover { transform: scale(1.1) rotate(6deg); }
+
 /* Final CTA */
 .final-cta { text-align: center; }
 .cta-title { font-family: var(--display); font-weight: 600; font-size: clamp(28px, 4.4vw, 48px); letter-spacing: -.5px; margin: 0 0 26px; color: var(--paper); }
