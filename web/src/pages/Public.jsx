@@ -117,23 +117,21 @@ function Hero({ setPanel }) {
         <Reveal>
           <span className="eyebrow"><span className="live-dot" /> Sello digital · Costa Rica</span>
         </Reveal>
-        {/* Titulo palabra por palabra (entrada tipo cortina, estilo studio de motion) */}
+        {/* Titulo palabra por palabra (cortina). El espaciado entre palabras
+            lo da CSS (.hw + .hw), porque los spans del map no traen espacios. */}
         <h1 className="hero-title">
-          {["Hacé", "que", "tus", "clientes"].map((w, i) => (
-            <span className="hw" key={w + i}>
-              <span style={{ "--d": `${0.12 + i * 0.09}s` }}>{w}</span>
+          {["Hacé", "que", "tus", "clientes", "vuelvan."].map((w, i) => (
+            <span className="hw" key={i}>
+              <span style={{ "--d": `${0.12 + i * 0.09}s` }}>
+                {w === "vuelvan." ? <><em className="ink-em">vuelvan</em>.</> : w}
+              </span>
             </span>
-          ))}{" "}
-          <span className="hw">
-            <span style={{ "--d": "0.5s" }}>
-              <em className="ink-em">vuelvan</em>.
-            </span>
-          </span>
+          ))}
         </h1>
         <Reveal delay={140}>
           <p className="hero-lead">
-            Fidelix es el sello digital de tu marca: cada compra suma, cada meta se canjea.
-            QR, Wallet y estadísticas — sin apps que tu cliente tenga que instalar.
+            El sello digital de tu marca: cada compra suma, cada meta se canjea.
+            QR, Wallet y estadísticas — sin apps que instalar.
           </p>
         </Reveal>
         <Reveal delay={210}>
@@ -219,10 +217,10 @@ function TicketCard() {
 }
 
 const STEPS = [
-  ["01", "Creá tu marca", "Registrate y personalizá logo, colores y recompensas en minutos.", 2],
-  ["02", "Compartí el código", "Tus clientes se inscriben con un código corto o escaneando un QR.", 4],
-  ["03", "Sumá en caja", "Cada compra, escaneás su tarjeta y el sello se actualiza al instante.", 7],
-  ["04", "Fidelizá", "Al llegar a la meta canjean su premio… y vuelven por el siguiente.", 10],
+  ["01", "Creá tu marca", "Logo, colores y recompensas en minutos.", 2],
+  ["02", "Compartí el código", "Tus clientes entran con un código corto o un QR.", 4],
+  ["03", "Sumá en caja", "Escaneás su tarjeta y el sello cae al instante.", 7],
+  ["04", "Fidelizá", "Premio canjeado… y vuelven por el siguiente.", 10],
 ];
 
 // Scrollytelling estilo pagina de producto: el boleto queda fijo y se va

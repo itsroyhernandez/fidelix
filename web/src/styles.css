@@ -187,8 +187,10 @@ h1, h2, h3 { font-family: var(--display); }
 .buddy-watch { animation: buddyLean 2.6s ease-in-out infinite; }
 @keyframes buddyLean { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-2.5deg); } }
 
-/* ===== Titulo palabra-por-palabra (cortina) ===== */
+/* ===== Titulo palabra-por-palabra (cortina) =====
+   Los spans del map no traen espacios: el espacio entre palabras es CSS. */
 .hw { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.hw + .hw { margin-left: .26em; }
 .hw > span { display: inline-block; transform: translateY(112%); animation: wordUp .75s cubic-bezier(.2,.75,.2,1) forwards; animation-delay: var(--d, 0s); }
 @keyframes wordUp { to { transform: translateY(0); } }
 
@@ -208,7 +210,7 @@ h1, h2, h3 { font-family: var(--display); }
 }
 
 /* Cinta de recompensas en movimiento (marquee) */
-.marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ink-2); padding: 14px 0; margin: 10px 0 20px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ink-2); padding: 13px 0; margin: 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .marquee-track { display: flex; gap: 40px; width: max-content; animation: marquee 32s linear infinite; }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 .marquee-item { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; font-family: var(--display); font-size: 17px; color: var(--paper); }
@@ -304,10 +306,10 @@ h1, h2, h3 { font-family: var(--display); }
 
 /* Hero — partido asimetrico: copy a la izquierda, boleto a la derecha */
 .hero-v2 {
-  max-width: 1120px; margin: 0 auto; padding: 40px 24px 70px;
-  display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center;
+  max-width: 1120px; margin: 0 auto; padding: 28px 22px 48px;
+  display: grid; grid-template-columns: 1.1fr .9fr; gap: 36px; align-items: center;
 }
-@media (max-width: 860px) { .hero-v2 { grid-template-columns: 1fr; padding-top: 20px; } }
+@media (max-width: 860px) { .hero-v2 { grid-template-columns: 1fr; padding-top: 12px; } }
 
 .eyebrow {
   display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px;
@@ -316,10 +318,10 @@ h1, h2, h3 { font-family: var(--display); }
 }
 .hero-title {
   font-family: var(--display); font-weight: 600; font-size: clamp(38px, 5.2vw, 66px);
-  line-height: 1.02; margin: 18px 0 18px; letter-spacing: -.5px; color: var(--paper);
+  line-height: 1.04; margin: 14px 0 14px; letter-spacing: -.5px; color: var(--paper);
 }
 .ink-em { font-style: italic; color: var(--brick-2); font-weight: 500; }
-.hero-lead { color: var(--muted); font-size: clamp(16px, 1.6vw, 18px); max-width: 480px; margin: 0 0 30px; line-height: 1.6; }
+.hero-lead { color: var(--muted); font-size: clamp(16px, 1.6vw, 18px); max-width: 460px; margin: 0 0 24px; line-height: 1.55; }
 .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
 .btn.lg { padding: 15px 24px; font-size: 15.5px; border-radius: 10px; }
 .btn.full { width: 100%; }
@@ -357,25 +359,31 @@ h1, h2, h3 { font-family: var(--display); }
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
 .reveal.in { opacity: 1; transform: none; }
 
-/* Sections */
-.section { max-width: 1120px; margin: 0 auto; padding: 64px 24px; }
-.section-title { font-family: var(--display); font-weight: 600; font-size: clamp(26px, 3.6vw, 40px); text-align: center; letter-spacing: -.5px; margin: 0 0 36px; color: var(--paper); }
+/* Sections — compacto: menos aire muerto entre bloques */
+.section { max-width: 1120px; margin: 0 auto; padding: 44px 22px; }
+.section-title { font-family: var(--display); font-weight: 600; font-size: clamp(26px, 3.6vw, 40px); text-align: center; letter-spacing: -.5px; margin: 0 0 26px; color: var(--paper); }
 .section-title.left { text-align: left; }
 
-/* Steps — scrollytelling: el boleto queda fijo mientras el texto avanza (estilo Apple) */
-.steps-scroll { padding-top: 40px; }
-.steps-grid { display: grid; grid-template-columns: .85fr 1fr; gap: 50px; margin-top: 10px; }
-@media (max-width: 820px) { .steps-grid { grid-template-columns: 1fr; } }
-.steps-sticky { position: sticky; top: 110px; align-self: start; }
-@media (max-width: 820px) { .steps-sticky { position: static; margin-bottom: 20px; } }
+/* Steps — scrollytelling: el boleto queda fijo y se llena mientras el texto avanza */
+.steps-scroll { padding-top: 16px; }
+.steps-grid { display: grid; grid-template-columns: .85fr 1fr; gap: 44px; }
+.steps-sticky { position: sticky; top: 96px; align-self: start; }
 .steps-ticket-visual { width: 100%; max-width: 340px; margin: 0 auto; }
 .steps-track { display: flex; flex-direction: column; }
-.step-block { min-height: 62vh; display: flex; flex-direction: column; justify-content: center; opacity: .3; transition: opacity .3s ease; }
+.step-block { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; opacity: .3; transition: opacity .3s ease; }
 .step-block.active { opacity: 1; }
-@media (max-width: 820px) { .step-block { min-height: 0; opacity: 1; padding: 18px 0; border-bottom: 1px solid var(--line); } }
 .step-n { font-family: var(--mono); font-size: 13px; color: var(--bronze); letter-spacing: 1px; }
-.step-block h3 { margin: 10px 0 8px; font-size: clamp(22px, 3vw, 30px); font-family: var(--display); }
-.step-block p { max-width: 380px; }
+.step-block h3 { margin: 8px 0 6px; font-size: clamp(22px, 3vw, 30px); font-family: var(--display); }
+.step-block p { max-width: 380px; margin: 0; }
+
+/* En pantallas angostas el boleto NO desaparece: queda pegado arriba y
+   se sigue llenando mientras scrolleas los pasos. */
+@media (max-width: 820px) {
+  .steps-grid { display: block; }
+  .steps-sticky { position: sticky; top: 64px; z-index: 6; display: flex; justify-content: center; pointer-events: none; }
+  .steps-ticket-visual { max-width: 250px; box-shadow: 0 18px 40px rgba(0,0,0,.55); }
+  .step-block { min-height: 58vh; justify-content: flex-end; padding-bottom: 9vh; }
+}
 
 /* Benefits — carrusel arrastrable (estilo browsing de Epidemic Sound) */
 .benefits-head { margin-bottom: 20px; align-items: center; }
