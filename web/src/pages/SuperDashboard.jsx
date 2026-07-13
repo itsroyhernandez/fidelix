@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import Icon from "../components/Icon.jsx";
 
 // Panel Movix: TODAS las marcas y sus usuarios. Nadie mas ve esto.
 export default function SuperDashboard() {
@@ -26,18 +27,18 @@ export default function SuperDashboard() {
 
       {overview && (
         <div className="stat-grid">
-          <div className="stat-card">
-            <div className="stat-emoji">🏢</div>
+          <div className="stat-card tone-brick">
+            <span className="stat-ico"><Icon name="building" size={20} /></span>
             <div className="stat-value">{overview.tenants}</div>
             <div className="stat-label muted">Marcas</div>
           </div>
-          <div className="stat-card">
-            <div className="stat-emoji">👤</div>
+          <div className="stat-card tone-bronze">
+            <span className="stat-ico"><Icon name="user" size={20} /></span>
             <div className="stat-value">{overview.users}</div>
             <div className="stat-label muted">Usuarios</div>
           </div>
-          <div className="stat-card">
-            <div className="stat-emoji">💳</div>
+          <div className="stat-card tone-pine">
+            <span className="stat-ico"><Icon name="card" size={20} /></span>
             <div className="stat-value">{overview.cards}</div>
             <div className="stat-label muted">Tarjetas</div>
           </div>

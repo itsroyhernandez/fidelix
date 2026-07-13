@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
 
-const EMOJIS = ["🎁", "☕", "🍰", "🍔", "🍕", "🛍️", "✂️", "💅", "🏋", "🌮", "🍦", "✨"];
+const EMOJIS = ["🎁", "☕", "🍰", "🍔", "🍕", "🍦", "🌮", "🍩", "💈", "💅", "🎀", "⭐"];
 
 // 10 colores predefinidos (clic para elegir) + campo hex para color propio.
+// Arranca con los tonos de la línea Fidelix y ofrece variantes maduras (nada de
+// morado-degradado genérico); un comercio igual puede meter su hex exacto.
 const PALETTE = [
-  "#7c5cff", "#ff4d8d", "#f5b544", "#35c68a", "#3aa0ff",
-  "#ff6b3d", "#c15cff", "#0ea5a5", "#e11d48", "#111827",
+  "#b23a2e", "#9c7a3c", "#3d6b57", "#c1502f", "#7d5a3c",
+  "#2f5d8a", "#8a2f57", "#4a4a52", "#a8892f", "#14110f",
 ];
 
 function SwatchPicker({ label, value, onChange }) {

@@ -1,32 +1,37 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import { QRCodeCanvas } from "qrcode.react";
 import ScanPanel from "./ScanPanel.jsx";
 import Stats from "../components/Stats.jsx";
 import Branding from "../components/Branding.jsx";
+import Report from "../components/Report.jsx";
+import Icon from "../components/Icon.jsx";
+
+const TABS = [
+  ["stats", "Resumen", "chart"],
+  ["programs", "Programas", "target"],
+  ["brand", "Marca", "palette"],
+  ["scan", "Escanear", "scan"],
+  ["report", "Reportes", "mail"],
+];
 
 export default function AdminView({ tenant, onTenant }) {
   const [tab, setTab] = useState("stats");
   return (
     <div className="stack">
       <div className="tabs scroll-tabs">
-        <button className={tab === "stats" ? "tab active" : "tab"} onClick={() => setTab("stats")}>
-          Resumen
-        </button>
-        <button className={tab === "programs" ? "tab active" : "tab"} onClick={() => setTab("programs")}>
-          Programas
-        </button>
-        <button className={tab === "brand" ? "tab active" : "tab"} onClick={() => setTab("brand")}>
-          Marca
-        </button>
-        <button className={tab === "scan" ? "tab active" : "tab"} onClick={() => setTab("scan")}>
-          Escanear
-        </button>
+        {TABS.map(([key, label, icon]) => (
+          <button key={key} className={tab === key ? "tab active" : "tab"} onClick={() => setTab(key)}>
+            <Icon name={icon} size={16} /> {label}
+          </button>
+        ))}
       </div>
 
       {tab === "stats" && <Stats />}
       {tab === "programs" && <Programs />}
       {tab === "brand" && <Branding tenant={tenant} onTenant={onTenant} />}
       {tab === "scan" && <ScanPanel />}
+      {tab === "report" && <Report />}
     </div>
   );
 }
@@ -66,6 +71,11 @@ function Programs() {
   async function viewCustomers(p) {
     const d = await api(`/programs/${p.id}/customers`);
     setCustomers({ program: p, ...d });
+  }
+  async function reloadCustomers() {
+    if (!customers) return;
+    const d = await api(`/programs/${customers.program.id}/customers`);
+    setCustomers((c) => ({ ...c, ...d }));
   }
 
   function copyCode(code) {
@@ -120,6 +130,9 @@ function Programs() {
               </button>
             </div>
             <p className="muted tiny">{customers.total} inscritos</p>
+
+            <AddCustomer program={customers.program} onAdded={reloadCustomers} />
+
             <table className="table">
               <thead>
                 <tr>
@@ -151,7 +164,82 @@ function Programs() {
   );
 }
 
-const EMOJIS = ["⭐", "☕", "🍰", "🍔", "🍕", "🎁", "💇", "💅", "🏋️", "🛍️", "🌮", "🍦"];
+// Alta manual de un cliente (walk-in en el mostrador).
+function AddCustomer({ program, onAdded }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", balance: 0 });
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  async function submit(e) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const d = await api(`/programs/${program.id}/customers`, {
+        method: "POST",
+        body: { name: form.name, email: form.email.trim(), balance: Number(form.balance) || 0 },
+      });
+      setResult(d);
+      setForm({ name: "", email: "", balance: 0 });
+      onAdded?.();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (result) {
+    const c = result.customer;
+    return (
+      <div className="add-done">
+        <div className="row between">
+          <b>✓ {c.name} agregado</b>
+          <button className="link" onClick={() => setResult(null)}>Agregar otro</button>
+        </div>
+        <div className="qr-box">
+          <QRCodeCanvas value={c.token} size={130} includeMargin bgColor="#ffffff" />
+          <p className="tiny muted">Este es el QR del cliente para sumar sellos en caja.</p>
+        </div>
+        {result.credentials && (
+          <div className="creds">
+            <p className="tiny">Cuenta creada. Pasale estos datos para que entre desde su teléfono:</p>
+            <div className="cred-row"><span>Correo</span><code>{result.credentials.email}</code></div>
+            <div className="cred-row"><span>Contraseña temporal</span><code>{result.credentials.tempPassword}</code></div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button className="btn primary sm add-toggle" onClick={() => setOpen(true)}>
+        + Agregar cliente
+      </button>
+    );
+  }
+
+  return (
+    <form className="add-form" onSubmit={submit}>
+      <div className="row">
+        <input className="input" placeholder="Nombre del cliente" value={form.name} onChange={set("name")} required />
+        <input className="input" type="email" placeholder="correo@cliente.com" value={form.email} onChange={set("email")} required />
+      </div>
+      <div className="row">
+        <input className="input" type="number" min="0" max={program.goal} placeholder="Sellos iniciales (0)" value={form.balance} onChange={set("balance")} />
+        <button className="btn primary" disabled={busy}>{busy ? "…" : "Agregar"}</button>
+        <button type="button" className="btn ghost" onClick={() => setOpen(false)}>Cancelar</button>
+      </div>
+      {error && <div className="error">{error}</div>}
+    </form>
+  );
+}
+
+const EMOJIS = ["⭐", "☕", "🍰", "🍔", "🍕", "🍦", "🍩", "🌮", "🎁", "💈", "💅", "🎀"];
 
 function ProgramForm({ initial, onCancel, onSave }) {
   const [f, setF] = useState({ ...initial });

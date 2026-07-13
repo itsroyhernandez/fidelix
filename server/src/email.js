@@ -24,4 +24,15 @@ async function sendReal({ to, name, code }) {
   return { delivered: true };
 }
 
-module.exports = { sendVerificationEmail };
+// Envia el reporte mensual con el branding de la marca.
+async function sendReportEmail({ to, name, report }) {
+  if (env.emailEnabled) {
+    // TODO(prod): renderizar HTML branded del reporte y enviarlo con tu proveedor.
+    console.log(`[email] (stub) reporte para ${to}`);
+    return { delivered: true };
+  }
+  console.log(`\n[email:dev] Reporte de "${report.brand.name}" para ${to}:`, JSON.stringify(report.stats), "\n");
+  return { delivered: false };
+}
+
+module.exports = { sendVerificationEmail, sendReportEmail };

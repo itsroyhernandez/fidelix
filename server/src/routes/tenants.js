@@ -122,6 +122,18 @@ router.get("/me/report", requireAuth, requireRole("ADMIN"), async (req, res) => 
   res.json({ report });
 });
 
+// --- ADMIN: enviarme el reporte por correo ahora ---
+router.post("/me/report/send", requireAuth, requireRole("ADMIN"), async (req, res) => {
+  const { buildReport } = require("../jobs/reports");
+  const { sendReportEmail } = require("../email");
+  const admin = await prisma.user.findUnique({ where: { id: req.user.id } });
+  const report = await buildReport(req.user.tenantId);
+  if (!report) return res.status(404).json({ error: "Marca no encontrada" });
+
+  const out = await sendReportEmail({ to: admin.email, name: admin.name, report });
+  res.json({ delivered: !!out.delivered, to: admin.email });
+});
+
 function shapeTenant(t) {
   return {
     id: t.id,

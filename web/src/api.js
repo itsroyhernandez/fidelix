@@ -1,5 +1,5 @@
 // Cliente minimo de la API. Guarda el token JWT en localStorage.
-const TOKEN_KEY = "sello_token";
+const TOKEN_KEY = "fidelix_token";
 
 export const auth = {
   get token() {

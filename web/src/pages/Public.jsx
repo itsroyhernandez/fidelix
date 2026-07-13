@@ -4,6 +4,7 @@ import { useReveal } from "../hooks/useReveal.js";
 import Seal from "../components/Seal.jsx";
 import Privacy from "./Privacy.jsx";
 import { GoogleLogo, AppleLogo, MicrosoftLogo } from "../components/BrandLogos.jsx";
+import SealBuddy from "../components/SealBuddy.jsx";
 import StampDemo from "../components/StampDemo.jsx";
 import PlanFinder from "../components/PlanFinder.jsx";
 import TiltCard from "../components/TiltCard.jsx";
@@ -59,6 +60,7 @@ export default function Public({ onAuthed }) {
         </nav>
 
         <Hero setPanel={setPanel} />
+        <RewardMarquee />
         <Steps />
         <TryIt />
         <Benefits />
@@ -97,12 +99,22 @@ function Hero({ setPanel }) {
   return (
     <header className="hero-v2" ref={heroRef}>
       <div className="hero-copy">
-        <Reveal><span className="eyebrow">Sello digital · Costa Rica</span></Reveal>
-        <Reveal delay={70}>
-          <h1 className="hero-title">
-            Hacé que tus clientes <em className="ink-em">vuelvan</em>.
-          </h1>
+        <Reveal>
+          <span className="eyebrow"><span className="live-dot" /> Sello digital · Costa Rica</span>
         </Reveal>
+        {/* Titulo palabra por palabra (entrada tipo cortina, estilo studio de motion) */}
+        <h1 className="hero-title">
+          {["Hacé", "que", "tus", "clientes"].map((w, i) => (
+            <span className="hw" key={w + i}>
+              <span style={{ "--d": `${0.12 + i * 0.09}s` }}>{w}</span>
+            </span>
+          ))}{" "}
+          <span className="hw">
+            <span style={{ "--d": "0.5s" }}>
+              <em className="ink-em">vuelvan</em>.
+            </span>
+          </span>
+        </h1>
         <Reveal delay={140}>
           <p className="hero-lead">
             Fidelix es el sello digital de tu marca: cada compra suma, cada meta se canjea.
@@ -111,7 +123,7 @@ function Hero({ setPanel }) {
         </Reveal>
         <Reveal delay={210}>
           <div className="hero-cta">
-            <button className="btn primary lg" onClick={() => setPanel("brand")}>Probar gratis 3 días</button>
+            <button className="btn primary lg shine" onClick={() => setPanel("brand")}>Probar gratis 3 días</button>
             <button className="btn line lg" onClick={() => setPanel("customer")}>Soy cliente</button>
           </div>
         </Reveal>
@@ -123,6 +135,26 @@ function Hero({ setPanel }) {
         </div>
       </Reveal>
     </header>
+  );
+}
+
+// Cinta de recompensas en movimiento (como papel saliendo de una impresora de tickets).
+const REWARDS = [
+  "1 café gratis", "La 10ª pizza va por la casa", "Corte #8 sin costo", "2x1 los martes",
+  "Postre gratis en tu cumple", "Envío gratis al 5º pedido", "Manicure #6 gratis", "Bebida grande al 7º combo",
+];
+function RewardMarquee() {
+  const row = [...REWARDS, ...REWARDS];
+  return (
+    <div className="marquee" aria-hidden>
+      <div className="marquee-track">
+        {row.map((r, i) => (
+          <span className="marquee-item" key={i}>
+            <span className="marquee-dot" /> {r}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -395,9 +427,18 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [oauthMsg, setOauthMsg] = useState("");
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const [focus, setFocus] = useState(null); // campo enfocado -> reacciona la mascota
+  const set = (k) => (e) => {
+    setForm({ ...form, [k]: e.target.value });
+    if (error) setError("");
+  };
+  const eyes = (k) => ({ onFocus: () => setFocus(k), onBlur: () => setFocus(null) });
 
   const pwOk = validatePassword(form.password);
+
+  // La mascota: cierra los ojos en la contraseña, sigue el texto en el resto.
+  const buddyMode = error ? "error" : focus === "password" ? "shy" : focus ? "watch" : "idle";
+  const buddyWatch = focus && focus !== "password" ? Math.min((form[focus]?.length || 0) / 24, 1) : 0.5;
 
   async function submit(e) {
     e.preventDefault();
@@ -447,6 +488,10 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
           <button className="btn ghost sm" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
 
+        <div className="buddy-wrap">
+          <SealBuddy mode={buddyMode} watch={buddyWatch} />
+        </div>
+
         <div className="social-row">
           <button className="social-btn" onClick={() => social("google")}><GoogleLogo /> Google</button>
           <button className="social-btn" onClick={() => social("apple")}><AppleLogo /> Apple</button>
@@ -458,16 +503,16 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
         <form onSubmit={submit} className="form">
           {mode === "brand" && (
             <>
-              <input className="input" placeholder={PLACEHOLDERS.brandName} value={form.brandName} onChange={set("brandName")} required />
-              <input className="input" placeholder={PLACEHOLDERS.ownerName} value={form.ownerName} onChange={set("ownerName")} required />
-              <input className="input" placeholder={PLACEHOLDERS.phone} value={form.phone} onChange={set("phone")} />
+              <input className="input" placeholder={PLACEHOLDERS.brandName} value={form.brandName} onChange={set("brandName")} {...eyes("brandName")} required />
+              <input className="input" placeholder={PLACEHOLDERS.ownerName} value={form.ownerName} onChange={set("ownerName")} {...eyes("ownerName")} required />
+              <input className="input" placeholder={PLACEHOLDERS.phone} value={form.phone} onChange={set("phone")} {...eyes("phone")} />
             </>
           )}
           {mode === "customer" && (
-            <input className="input" placeholder={PLACEHOLDERS.name} value={form.name} onChange={set("name")} required />
+            <input className="input" placeholder={PLACEHOLDERS.name} value={form.name} onChange={set("name")} {...eyes("name")} required />
           )}
-          <input className="input" type="email" placeholder={PLACEHOLDERS.email} value={form.email} onChange={set("email")} required />
-          <input className="input" type="password" placeholder="Contraseña" value={form.password} onChange={set("password")} required />
+          <input className="input" type="email" placeholder={PLACEHOLDERS.email} value={form.email} onChange={set("email")} {...eyes("email")} required />
+          <input className="input" type="password" placeholder="Contraseña" value={form.password} onChange={set("password")} {...eyes("password")} required />
 
           {mode !== "login" && form.password.length > 0 && (
             <ul className="pw-rules">

@@ -2,7 +2,9 @@ const express = require("express");
 const { prisma } = require("../prisma");
 const { validate } = require("../validate");
 const { requireAuth, requireRole, requireActiveTenant } = require("../middleware");
-const { shortCode } = require("../util");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+const { shortCode, cardToken } = require("../util");
 
 const router = express.Router();
 
@@ -94,6 +96,74 @@ router.get("/:id/customers", async (req, res) => {
       goal: program.goal,
       status: c.status,
     })),
+  });
+});
+
+// Alta MANUAL de un cliente en un programa (para el mostrador / walk-in).
+// El dueño da fe de la persona, asi que la cuenta queda verificada. Se le crea
+// una contraseña temporal y se devuelve el token del QR para entregarselo.
+router.post("/:id/customers", validate("addCustomer"), async (req, res) => {
+  const program = await prisma.program.findFirst({
+    where: { id: req.params.id, tenantId: req.user.tenantId },
+  });
+  if (!program) return res.status(404).json({ error: "Programa no encontrado" });
+
+  const email = req.body.email.toLowerCase().trim();
+  const balance = Math.min(req.body.balance || 0, program.goal);
+
+  const result = await prisma.$transaction(async (tx) => {
+    let user = await tx.user.findUnique({ where: { email } });
+    let tempPassword = null;
+    if (!user) {
+      tempPassword = crypto.randomBytes(5).toString("hex"); // 10 chars, con letras+numeros
+      user = await tx.user.create({
+        data: {
+          email,
+          name: req.body.name,
+          passwordHash: await bcrypt.hash(tempPassword, 12),
+          role: "CUSTOMER",
+          emailVerified: true, // el comercio da fe
+        },
+      });
+    }
+
+    const existing = await tx.card.findUnique({
+      where: { programId_userId: { programId: program.id, userId: user.id } },
+    });
+    if (existing) {
+      const e = new Error("Ese cliente ya está en este programa");
+      e.status = 409;
+      throw e;
+    }
+
+    const completed = balance >= program.goal;
+    const card = await tx.card.create({
+      data: {
+        programId: program.id,
+        userId: user.id,
+        token: cardToken(),
+        balance,
+        status: completed ? "COMPLETED" : "ACTIVE",
+        completedAt: completed ? new Date() : null,
+      },
+    });
+    return { user, card, tempPassword };
+  });
+
+  res.status(201).json({
+    customer: {
+      cardId: result.card.id,
+      name: result.user.name,
+      email: result.user.email,
+      token: result.card.token,
+      balance: result.card.balance,
+      goal: program.goal,
+      status: result.card.status,
+    },
+    // Solo si se creó cuenta nueva: credenciales para entregarle al cliente.
+    credentials: result.tempPassword
+      ? { email: result.user.email, tempPassword: result.tempPassword }
+      : null,
   });
 });
 

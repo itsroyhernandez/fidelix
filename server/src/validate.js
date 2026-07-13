@@ -58,6 +58,11 @@ const schemas = {
   enroll: z.object({
     code: z.string().min(4).max(20),
   }),
+  addCustomer: z.object({
+    name: z.string().min(1).max(120),
+    email: z.string().email().max(160),
+    balance: z.number().int().min(0).max(1000).optional().default(0),
+  }),
   scan: z.object({
     token: z.string().min(8).max(80),
     delta: z.number().int().min(1).max(50).default(1),
