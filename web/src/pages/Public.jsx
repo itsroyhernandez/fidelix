@@ -5,6 +5,9 @@ import Seal from "../components/Seal.jsx";
 import Privacy from "./Privacy.jsx";
 import { GoogleLogo, AppleLogo, MicrosoftLogo } from "../components/BrandLogos.jsx";
 import SealBuddy from "../components/SealBuddy.jsx";
+import InkField from "../components/InkField.jsx";
+import InkCursor from "../components/InkCursor.jsx";
+import { useMagnetic } from "../hooks/useMagnetic.js";
 import StampDemo from "../components/StampDemo.jsx";
 import PlanFinder from "../components/PlanFinder.jsx";
 import TiltCard from "../components/TiltCard.jsx";
@@ -43,7 +46,9 @@ export default function Public({ onAuthed }) {
     <div className="landing-v2">
       {/* Todo lo que compone la pagina vive en .stage; los overlays quedan AFUERA
           para que ninguna regla de apilamiento del contenido los pueda enterrar. */}
+      <InkCursor />
       <div className="stage">
+        <InkField />
         <div className="grain" aria-hidden />
 
         <nav className="nav">
@@ -86,6 +91,16 @@ export default function Public({ onAuthed }) {
   );
 }
 
+// Boton que se inclina hacia el cursor (efecto magnetico de sitios de motion).
+function MagneticButton({ className, onClick, children }) {
+  const m = useMagnetic(0.28);
+  return (
+    <button ref={m.ref} className={className} onClick={onClick} onMouseMove={m.onMouseMove} onMouseLeave={m.onMouseLeave}>
+      {children}
+    </button>
+  );
+}
+
 function Hero({ setPanel }) {
   const heroRef = useRef(null);
   // El boleto responde al scroll en tiempo real (no una animacion de timer) -
@@ -123,15 +138,21 @@ function Hero({ setPanel }) {
         </Reveal>
         <Reveal delay={210}>
           <div className="hero-cta">
-            <button className="btn primary lg shine" onClick={() => setPanel("brand")}>Probar gratis 3 días</button>
-            <button className="btn line lg" onClick={() => setPanel("customer")}>Soy cliente</button>
+            <MagneticButton className="btn primary lg shine" onClick={() => setPanel("brand")}>
+              Probar gratis 3 días
+            </MagneticButton>
+            <MagneticButton className="btn line lg" onClick={() => setPanel("customer")}>
+              Soy cliente
+            </MagneticButton>
           </div>
         </Reveal>
       </div>
 
       <Reveal delay={280} className="hero-ticket-wrap">
         <div style={ticketStyle}>
-          <TicketCard />
+          <TiltCard max={8}>
+            <TicketCard />
+          </TiltCard>
         </div>
       </Reveal>
     </header>
@@ -406,7 +427,9 @@ function FinalCTA({ setPanel }) {
     <section className="section final-cta">
       <Reveal>
         <h2 className="cta-title">Tu programa de lealtad, listo hoy.</h2>
-        <button className="btn primary lg" onClick={() => setPanel("brand")}>Probar Fidelix gratis</button>
+        <MagneticButton className="btn primary lg shine" onClick={() => setPanel("brand")}>
+          Probar Fidelix gratis
+        </MagneticButton>
       </Reveal>
     </section>
   );

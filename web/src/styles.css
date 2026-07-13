@@ -115,6 +115,57 @@ h1, h2, h3 { font-family: var(--display); }
 /* Íconos propios */
 .icon { display: inline-block; vertical-align: -0.18em; flex: none; }
 
+/* ===== Fondo vivo (canvas de tinta) =====
+   .stage > .ink-field para ganarle a la regla generica .stage > * (specificity) */
+.ink-field, .stage > .ink-field { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* ===== Cursor de tinta (solo escritorio) ===== */
+.ink-cursor-dot, .ink-cursor-ring {
+  position: fixed; top: 0; left: 0; z-index: 999; pointer-events: none; opacity: 0;
+  border-radius: 50%; transition: opacity .3s;
+}
+.ink-cursor-dot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: var(--brick-2); }
+.ink-cursor-ring { width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 1.5px solid var(--brick-2); opacity: 0; }
+@media (pointer: coarse) { .ink-cursor-dot, .ink-cursor-ring { display: none; } }
+
+/* ===== Estampado final de la demo (slam + salpicadura) ===== */
+.slam-layer { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.slam-seal {
+  color: var(--brick);
+  filter: drop-shadow(0 8px 18px rgba(178,58,46,.4));
+  animation: slamDown .6s cubic-bezier(.16,1.35,.3,1) both;
+}
+@keyframes slamDown {
+  0% { opacity: 0; transform: scale(3.6) rotate(-26deg); }
+  55% { opacity: 1; transform: scale(.9) rotate(-9deg); }
+  75% { transform: scale(1.07) rotate(-14deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-12deg); }
+}
+.slam-shake { animation: ticketJolt .5s .22s ease both; }
+@keyframes ticketJolt {
+  0%, 100% { transform: translate(0,0) rotate(0); }
+  20% { transform: translate(-4px, 3px) rotate(-1deg); }
+  45% { transform: translate(4px, -2px) rotate(1.2deg); }
+  70% { transform: translate(-2px, 1px) rotate(-.6deg); }
+}
+.splat { position: absolute; inset: 0; }
+.splat i {
+  position: absolute; top: 50%; left: 50%; width: var(--s); height: var(--s);
+  border-radius: 50%; background: var(--brick);
+  animation: splatFly .75s .24s cubic-bezier(.1,.8,.3,1) both;
+}
+.splat i:nth-child(3n) { background: var(--bronze); }
+.splat i:nth-child(5n) { border-radius: 40% 60% 55% 45%; }
+@keyframes splatFly {
+  0% { transform: rotate(var(--a)) translateX(6px) scale(.3); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: rotate(var(--a)) translateX(var(--d)) scale(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slam-seal { animation: none; opacity: .92; transform: rotate(-12deg); }
+  .slam-shake, .splat i { animation: none; }
+}
+
 /* ===== SealBuddy: la mascota del login ===== */
 .buddy-wrap { display: flex; justify-content: center; margin: 2px 0 6px; }
 .buddy { color: var(--brick); }
