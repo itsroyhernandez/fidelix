@@ -166,26 +166,23 @@ h1, h2, h3 { font-family: var(--display); }
   .slam-shake, .splat i { animation: none; }
 }
 
-/* ===== SealBuddy: la mascota del login ===== */
+/* ===== SealBuddy: la mascota del login =====
+   OJO: pupilas, parpados y ladeo los mueve JS por ATRIBUTO transform (60fps).
+   No poner transform/transition CSS en .buddy-pupil ni .buddy-lid: lo pisarian. */
 .buddy-wrap { display: flex; justify-content: center; margin: 2px 0 6px; }
-.buddy { color: var(--brick); }
-.buddy * { transform-box: fill-box; transform-origin: center; }
-.buddy-pupil { transition: transform .16s ease-out; }
-/* parpados: cerrados = scaleY(1); abiertos = scaleY(0) con parpadeo ocasional */
-.buddy-lid { transform: scaleY(0); transition: transform .22s cubic-bezier(.4,0,.2,1); animation: blink 5.2s infinite; }
-.buddy-shy .buddy-lid { transform: scaleY(1); animation: none; }
-@keyframes blink { 0%, 93%, 100% { transform: scaleY(0); } 95.5%, 97% { transform: scaleY(1); } }
+.buddy { color: var(--brick); animation: buddyBreathe 4.5s ease-in-out infinite; }
+@keyframes buddyBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.018); } }
 /* cachetes solo cuando esta timido */
 .buddy-blush { opacity: 0; transition: opacity .25s; }
 .buddy-shy .buddy-blush { opacity: 1; }
-/* cejas: bajan un poco en error */
-.buddy-brow { transition: transform .2s; }
+/* cejas */
+.buddy-brow { transform-box: fill-box; transform-origin: center; transition: transform .2s; }
 .buddy-error .buddy-brow { transform: translateY(2.5px) rotate(-4deg); }
 .buddy-error .buddy-brow:last-of-type { transform: translateY(2.5px) rotate(4deg); }
-.buddy-error { animation: buddyShake .4s ease; }
+.buddy-shy .buddy-brow { transform: translateY(1.5px); }
+.buddy-error { animation: buddyShake .4s ease, buddyBreathe 4.5s ease-in-out infinite; }
 @keyframes buddyShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 60% { transform: translateX(4px); } }
-.buddy-watch { animation: buddyLean 2.6s ease-in-out infinite; }
-@keyframes buddyLean { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-2.5deg); } }
+@media (prefers-reduced-motion: reduce) { .buddy { animation: none; } }
 
 /* ===== Titulo palabra-por-palabra (cortina) =====
    Los spans del map no traen espacios: el espacio entre palabras es CSS. */
@@ -246,6 +243,29 @@ h1, h2, h3 { font-family: var(--display); }
 .qr-box .muted { color: #667; }
 .wallet-row { display: flex; gap: 8px; margin-top: 14px; }
 .wallet-row .btn { flex: 1; }
+
+/* Interfaz del cliente v2 */
+.loyalty-card { position: relative; transition: transform .15s ease; transform-style: preserve-3d; }
+.stamp.pop { animation: stampPop .4s cubic-bezier(.34,1.56,.64,1) both; }
+.lc-missing { font-size: 13.5px; color: rgba(255,255,255,.92); margin: 2px 0 6px; font-weight: 600; }
+.qr-btn { width: 100%; border: none; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
+.qr-btn:hover { transform: scale(1.015); box-shadow: 0 8px 22px rgba(0,0,0,.3); }
+.card-stamped {
+  position: absolute; top: 14px; right: 14px; transform: rotate(12deg); pointer-events: none;
+  border: 3px double var(--paper); border-radius: 8px; padding: 4px 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--paper); opacity: .9;
+  animation: slamDown .5s cubic-bezier(.16,1.35,.3,1) both;
+}
+.qr-big {
+  background: var(--paper); color: var(--ink); border-radius: 16px; padding: 22px;
+  display: grid; gap: 12px; justify-items: center; max-width: 92vw;
+  animation: overlayIn .25s ease both;
+}
+.qr-big-head { text-align: center; display: grid; gap: 2px; }
+.qr-big-head b { font-family: var(--display); font-size: 18px; }
+.qr-big canvas { border-radius: 10px; }
+.qr-big .muted { color: #6b6250; }
+.qr-big .btn.line { border-color: #b7a98d; color: var(--ink); }
 
 /* Enroll */
 .enroll { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
@@ -510,6 +530,17 @@ h1, h2, h3 { font-family: var(--display); }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .pw-rules { list-style: none; padding: 0; margin: 2px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; color: var(--muted); }
 .pw-rules li.ok { color: var(--pine); }
+/* Campo de contraseña con boton "ver" (la mascota abre un ojo) */
+.pw-field { position: relative; }
+.pw-field .input { padding-right: 74px; }
+.pw-toggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: 1px solid var(--line); border-radius: 7px; cursor: pointer;
+  color: var(--bronze); font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 5px 9px; transition: border-color .2s, color .2s;
+}
+.pw-toggle:hover { border-color: var(--brick-2); color: var(--brick-2); }
+.caps-hint { font-size: 12px; color: var(--bronze); font-family: var(--mono); }
 .switch { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .link { background: none; border: none; color: var(--brick-2); cursor: pointer; font-size: 14px; text-align: left; padding: 0; }
 

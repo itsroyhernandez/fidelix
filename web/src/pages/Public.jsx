@@ -522,17 +522,23 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
   const [busy, setBusy] = useState(false);
   const [oauthMsg, setOauthMsg] = useState("");
   const [focus, setFocus] = useState(null); // campo enfocado -> reacciona la mascota
+  const [showPw, setShowPw] = useState(false); // "ver contraseña": la mascota abre un ojo
+  const [lastTypeAt, setLastTypeAt] = useState(0); // si pausas al escribir, espía solita
+  const [capsOn, setCapsOn] = useState(false);
   const set = (k) => (e) => {
     setForm({ ...form, [k]: e.target.value });
+    if (k === "password") setLastTypeAt(Date.now());
     if (error) setError("");
   };
   const eyes = (k) => ({ onFocus: () => setFocus(k), onBlur: () => setFocus(null) });
 
   const pwOk = validatePassword(form.password);
 
-  // La mascota: cierra los ojos en la contraseña, sigue el texto en el resto.
+  // La mascota: cierra los ojos en la contraseña, sigue el texto en el resto,
+  // y al mouse cuando no hay campo activo (eso lo maneja ella sola).
   const buddyMode = error ? "error" : focus === "password" ? "shy" : focus ? "watch" : "idle";
   const buddyWatch = focus && focus !== "password" ? Math.min((form[focus]?.length || 0) / 24, 1) : 0.5;
+  const checkCaps = (e) => setCapsOn(e.getModifierState?.("CapsLock") ?? false);
 
   async function submit(e) {
     e.preventDefault();
@@ -583,7 +589,13 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
         </div>
 
         <div className="buddy-wrap">
-          <SealBuddy mode={buddyMode} watch={buddyWatch} />
+          <SealBuddy
+            mode={buddyMode}
+            watch={buddyWatch}
+            peek={showPw}
+            happy={focus === "password" && pwOk.valid}
+            lastTypeAt={lastTypeAt}
+          />
         </div>
 
         <div className="social-row">
@@ -606,7 +618,23 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
             <input className="input" placeholder={PLACEHOLDERS.name} value={form.name} onChange={set("name")} {...eyes("name")} required />
           )}
           <input className="input" type="email" placeholder={PLACEHOLDERS.email} value={form.email} onChange={set("email")} {...eyes("email")} required />
-          <input className="input" type="password" placeholder="Contraseña" value={form.password} onChange={set("password")} {...eyes("password")} required />
+          <div className="pw-field">
+            <input
+              className="input"
+              type={showPw ? "text" : "password"}
+              placeholder="Contraseña"
+              value={form.password}
+              onChange={set("password")}
+              onKeyUp={checkCaps}
+              onKeyDown={checkCaps}
+              {...eyes("password")}
+              required
+            />
+            <button type="button" className="pw-toggle" onClick={() => setShowPw(!showPw)} aria-label={showPw ? "Ocultar contraseña" : "Ver contraseña"}>
+              {showPw ? "ocultar" : "ver"}
+            </button>
+          </div>
+          {capsOn && focus === "password" && <div className="caps-hint">⇪ Bloq Mayús está activado</div>}
 
           {mode !== "login" && form.password.length > 0 && (
             <ul className="pw-rules">

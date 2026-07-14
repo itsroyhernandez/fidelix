@@ -2,7 +2,7 @@ import { useRef } from "react";
 
 // Inclinacion 3D que sigue el cursor (efecto "producto premium").
 // Se resetea suave al salir el mouse via la transicion CSS del propio elemento.
-export default function TiltCard({ children, className = "", max = 7 }) {
+export default function TiltCard({ children, className = "", max = 7, style }) {
   const ref = useRef(null);
 
   function onMove(e) {
@@ -18,7 +18,7 @@ export default function TiltCard({ children, className = "", max = 7 }) {
   }
 
   return (
-    <div ref={ref} className={className} onMouseMove={onMove} onMouseLeave={reset} onBlur={reset}>
+    <div ref={ref} className={className} style={style} onMouseMove={onMove} onMouseLeave={reset} onBlur={reset}>
       {children}
     </div>
   );

@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { api } from "../api.js";
+import TiltCard from "../components/TiltCard.jsx";
+import Icon from "../components/Icon.jsx";
+
+const TABS = [
+  ["cards", "Mis tarjetas", "card"],
+  ["guide", "Guía", "stamp"],
+  ["support", "Soporte", "mail"],
+];
 
 export default function CustomerView() {
   const [tab, setTab] = useState("cards");
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bigQr, setBigQr] = useState(null); // tarjeta con el QR en grande
 
   async function load() {
     setLoading(true);
@@ -20,15 +29,11 @@ export default function CustomerView() {
   return (
     <div className="stack">
       <div className="tabs">
-        <button className={tab === "cards" ? "tab active" : "tab"} onClick={() => setTab("cards")}>
-          Mis tarjetas
-        </button>
-        <button className={tab === "guide" ? "tab active" : "tab"} onClick={() => setTab("guide")}>
-          Guía
-        </button>
-        <button className={tab === "support" ? "tab active" : "tab"} onClick={() => setTab("support")}>
-          Soporte
-        </button>
+        {TABS.map(([key, label, icon]) => (
+          <button key={key} className={tab === key ? "tab active" : "tab"} onClick={() => setTab(key)}>
+            <Icon name={icon} size={16} /> {label}
+          </button>
+        ))}
       </div>
 
       {tab === "cards" && (
@@ -43,7 +48,7 @@ export default function CustomerView() {
                 </p>
               )}
               {cards.map((c) => (
-                <LoyaltyCard key={c.id} card={c} />
+                <LoyaltyCard key={c.id} card={c} onShowQr={() => setBigQr(c)} />
               ))}
               <EnrollBox onEnrolled={load} />
             </>
@@ -53,66 +58,112 @@ export default function CustomerView() {
 
       {tab === "guide" && <Guide />}
       {tab === "support" && <Support cards={cards} />}
+
+      {bigQr && <QrModal card={bigQr} onClose={() => setBigQr(null)} />}
     </div>
   );
 }
 
-function LoyaltyCard({ card }) {
+function LoyaltyCard({ card, onShowQr }) {
   const brand = card.brand || {};
-  const primary = brand.primary || "#6d5efc";
-  const accent = brand.accent || "#e0b877";
-  const pct = Math.round((card.balance / card.program.goal) * 100);
+  const primary = brand.primary || "#b23a2e";
+  const accent = brand.accent || "#9c7a3c";
+  const goal = card.program.goal;
+  const pct = Math.round((card.balance / goal) * 100);
   const done = card.status === "COMPLETED";
   const redeemed = card.status === "REDEEMED";
+  const missing = Math.max(goal - card.balance, 0);
+  const unit = card.program.type === "STAMP" ? "sello" : "punto";
 
   return (
-    <div className="loyalty-card" style={{ "--card": primary, "--accent": accent }}>
-      <div className="lc-head">
-        <div>
-          <div className="lc-brand">
-            {brand.emoji} {brand.name}
+    <TiltCard className="loyalty-card" max={5} style={{ "--card": primary, "--accent": accent }}>
+      <div>
+        <div className="lc-head">
+          <div>
+            <div className="lc-brand">{brand.emoji} {brand.name}</div>
+            <div className="lc-title">{card.program.emoji} {card.program.name}</div>
+            <div className="lc-reward">🎁 {card.program.rewardText}</div>
           </div>
-          <div className="lc-title">
-            {card.program.emoji} {card.program.name}
-          </div>
-          <div className="lc-reward">🎁 {card.program.rewardText}</div>
-        </div>
-        <span className={`badge ${done ? "ok" : redeemed ? "muted-badge" : ""}`}>
-          {redeemed ? "Canjeada" : done ? "¡Lista!" : card.program.type === "STAMP" ? "Sellos" : "Puntos"}
-        </span>
-      </div>
-
-      {card.program.type === "STAMP" ? (
-        <div className="stamps">
-          {Array.from({ length: card.program.goal }).map((_, i) => (
-            <span key={i} className={`stamp ${i < card.balance ? "filled" : ""}`}>
-              {i < card.balance ? card.program.emoji || "★" : ""}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <div className="progress">
-          <div className="progress-bar" style={{ width: `${pct}%` }} />
-          <span className="progress-label">
-            {card.balance} / {card.program.goal}
+          <span className={`badge ${done ? "ok" : redeemed ? "muted-badge" : ""}`}>
+            {redeemed ? "Canjeada" : done ? "¡Lista!" : card.program.type === "STAMP" ? "Sellos" : "Puntos"}
           </span>
         </div>
-      )}
 
-      {!redeemed && (
-        <div className="qr-box">
-          <QRCodeCanvas value={card.token} size={148} includeMargin bgColor="#ffffff" />
-          <p className="tiny muted">Mostrá este código en caja para sumar</p>
+        {card.program.type === "STAMP" ? (
+          <div className="stamps">
+            {Array.from({ length: goal }).map((_, i) => (
+              <span
+                key={`${i}-${i < card.balance}`}
+                className={`stamp ${i < card.balance ? "filled pop" : ""}`}
+                style={i < card.balance ? { animationDelay: `${i * 70}ms` } : undefined}
+              >
+                {i < card.balance ? card.program.emoji || "★" : ""}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="progress">
+            <div className="progress-bar anim" style={{ width: `${pct}%` }} />
+            <span className="progress-label">{card.balance} / {goal}</span>
+          </div>
+        )}
+
+        {/* Microcopy que empuja a la meta */}
+        {!redeemed && (
+          <p className="lc-missing">
+            {done
+              ? "¡Meta cumplida! Mostrala en caja para canjear tu premio."
+              : missing <= 2
+              ? `¡Ya casi! Te ${missing === 1 ? "falta 1" : `faltan ${missing}`} ${unit}${missing === 1 ? "" : "s"}.`
+              : `Te faltan ${missing} ${unit}s para tu premio.`}
+          </p>
+        )}
+
+        {!redeemed && (
+          <button className="qr-box qr-btn" onClick={onShowQr} aria-label="Ver el código QR en grande">
+            <QRCodeCanvas value={card.token} size={148} includeMargin bgColor="#ffffff" />
+            <p className="tiny muted">Tocá para agrandar · mostralo en caja</p>
+          </button>
+        )}
+
+        {done && (
+          <div className="card-stamped" aria-hidden>
+            <span>PARA CANJE</span>
+          </div>
+        )}
+
+        <div className="wallet-row">
+          <a className="btn ghost sm" href={`/api/wallet/apple/${card.id}`} target="_blank" rel="noreferrer">
+             Apple Wallet
+          </a>
+          <a className="btn ghost sm" href={`/api/wallet/google/${card.id}`} target="_blank" rel="noreferrer">
+            Google Wallet
+          </a>
         </div>
-      )}
+      </div>
+    </TiltCard>
+  );
+}
 
-      <div className="wallet-row">
-        <a className="btn ghost sm" href={`/api/wallet/apple/${card.id}`} target="_blank" rel="noreferrer">
-           Apple Wallet
-        </a>
-        <a className="btn ghost sm" href={`/api/wallet/google/${card.id}`} target="_blank" rel="noreferrer">
-          Google Wallet
-        </a>
+// QR gigante para escanear facil en el mostrador.
+function QrModal({ card, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const size = Math.min(Math.floor(window.innerWidth * 0.75), 340);
+  return (
+    <div className="overlay" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="qr-big" onClick={(e) => e.stopPropagation()}>
+        <div className="qr-big-head">
+          <b>{card.brand?.emoji} {card.brand?.name}</b>
+          <span className="muted tiny">{card.program.name}</span>
+        </div>
+        <QRCodeCanvas value={card.token} size={size} includeMargin bgColor="#ffffff" />
+        <p className="tiny muted">Acercá el teléfono a la caja</p>
+        <button className="btn line full" onClick={onClose}>Cerrar</button>
       </div>
     </div>
   );
@@ -200,9 +251,7 @@ function Support({ cards }) {
           <h3 className="mt">Contacto de tus negocios</h3>
           {brands.map((b) => (
             <div key={b.name} className="support-brand">
-              <b>
-                {b.emoji} {b.name}
-              </b>
+              <b>{b.emoji} {b.name}</b>
               <p className="muted tiny">Consultá directamente al negocio por sus canjes.</p>
             </div>
           ))}
