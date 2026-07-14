@@ -51,8 +51,9 @@ export default function SealBuddy({ mode = "idle", watch = 0.5, peek = false, ha
           [tx, ty] = eyeTargetTowardMouse(svg);
         }
 
-        // espiar: forzado (boton "ver") o automatico si pausó de escribir
-        const idlePeek = mode === "shy" && lastTypeAt && Date.now() - lastTypeAt > 1400 && Math.floor(now / 2400) % 2 === 0;
+        // espiar: forzado (boton "ver") o automatico si pausó de escribir.
+        // Ritmo suave: abre el ojo ~0.9s de cada ~3.2s, no un parpadeo nervioso.
+        const idlePeek = mode === "shy" && lastTypeAt && Date.now() - lastTypeAt > 1400 && now % 3200 < 950;
         const peeking = mode === "shy" && (peek || idlePeek);
         if (peeking && mouse.current.has) [tx, ty] = eyeTargetTowardMouse(svg, 5.5);
 

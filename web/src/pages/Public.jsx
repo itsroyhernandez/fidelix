@@ -517,6 +517,9 @@ const PLACEHOLDERS = {
 
 function AuthModal({ mode, setMode, onClose, onAuthed }) {
   useOverlayLock(onClose);
+  // Cerrar solo si el CLIC EMPEZO en el fondo: arrastrar una seleccion de texto
+  // desde un input y soltar afuera NO debe cerrar el modal (perderias lo escrito).
+  const downOnBackdrop = useRef(false);
   const [form, setForm] = useState({ brandName: "", ownerName: "", name: "", email: "", password: "", phone: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -536,7 +539,9 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
 
   // La mascota: cierra los ojos en la contraseña, sigue el texto en el resto,
   // y al mouse cuando no hay campo activo (eso lo maneja ella sola).
-  const buddyMode = error ? "error" : focus === "password" ? "shy" : focus ? "watch" : "idle";
+  // Si la contraseña esta VISIBLE ("ver") y nadie escribe, se queda tapandose
+  // los ojos pero espiando — no abre los ojos de golpe.
+  const buddyMode = error ? "error" : focus === "password" ? "shy" : focus ? "watch" : showPw ? "shy" : "idle";
   const buddyWatch = focus && focus !== "password" ? Math.min((form[focus]?.length || 0) / 24, 1) : 0.5;
   const checkCaps = (e) => setCapsOn(e.getModifierState?.("CapsLock") ?? false);
 
@@ -581,7 +586,13 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
   const title = mode === "login" ? "Entrar" : mode === "customer" ? "Crear cuenta" : "Probar Fidelix gratis";
 
   return (
-    <div className="overlay" role="dialog" aria-modal="true" onClick={onClose}>
+    <div
+      className="overlay"
+      role="dialog"
+      aria-modal="true"
+      onMouseDown={(e) => { downOnBackdrop.current = e.target === e.currentTarget; }}
+      onClick={(e) => { if (e.target === e.currentTarget && downOnBackdrop.current) onClose(); }}
+    >
       <div className="overlay-body auth-modal" onClick={(e) => e.stopPropagation()}>
         <div className="row between">
           <h3>{title}</h3>
@@ -630,7 +641,13 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
               {...eyes("password")}
               required
             />
-            <button type="button" className="pw-toggle" onClick={() => setShowPw(!showPw)} aria-label={showPw ? "Ocultar contraseña" : "Ver contraseña"}>
+            <button
+              type="button"
+              className="pw-toggle"
+              onMouseDown={(e) => e.preventDefault()} /* no robar el foco: la mascota no debe abrir los ojos de golpe */
+              onClick={() => setShowPw(!showPw)}
+              aria-label={showPw ? "Ocultar contraseña" : "Ver contraseña"}
+            >
               {showPw ? "ocultar" : "ver"}
             </button>
           </div>
