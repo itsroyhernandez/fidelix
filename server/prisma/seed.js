@@ -1,9 +1,10 @@
-// Datos de demo con accesos de prueba. Corre con: npm run seed
+// Datos de demostracion. Corre con: npm run seed
 //
-// Genera:
-//   - SUPERADMIN (Movix / Royner)  -> ve TODAS las marcas
-//   - Marca "Kiku Holding" con dueño (ADMIN), cajero (STAFF) y un cliente (CUSTOMER)
-//   - Un programa de lealtad con codigo para inscribirse
+// Genera un entorno de VENTA/DEMO 100% ficticio (nada de marcas reales):
+//   - SUPERADMIN Movix (operador: ve todas las marcas)
+//   - Comercio demo "Cafetería La Esquina" (mismo nombre que los placeholders
+//     del sitio) con dueña, cajero y clientes con progreso variado
+//   - Plan ACTIVE (no TRIAL) para que la demo nunca expire a mitad de reunion
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 const { cardToken } = require("../src/util");
@@ -16,96 +17,110 @@ async function upsertUser(data) {
 }
 
 async function main() {
-  // --- SUPERADMIN: Movix ---
+  // --- Operador: Movix ---
   await upsertUser({
     email: "dueno@movix.com",
     passwordHash: hash("movix1234"),
-    name: "Movix (Superadmin)",
+    name: "Movix (Operador)",
     role: "SUPERADMIN",
     emailVerified: true,
   });
 
-  // --- Marca de prueba: Kiku Holding (prueba de 3 dias vigente) ---
+  // --- Comercio de demostracion (ficticio) ---
   const tenant = await prisma.tenant.upsert({
-    where: { slug: "kiku-holding" },
-    update: {},
+    where: { slug: "cafeteria-la-esquina" },
+    update: { plan: "ACTIVE" },
     create: {
-      name: "Kiku Holding",
-      slug: "kiku-holding",
-      plan: "TRIAL",
-      trialEndsAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      name: "Cafetería La Esquina",
+      slug: "cafeteria-la-esquina",
+      plan: "ACTIVE", // demo permanente: no expira
       emoji: "☕",
       primaryColor: "#6b4f3a",
       accentColor: "#e0b877",
-      description: "Programa de recompensas de Kiku Holding.",
-      supportEmail: "soporte@kikucr.com",
+      description: "El café de barrio que premia a los que vuelven.",
+      supportEmail: "hola@laesquina.cr",
+      supportPhone: "+506 8888 8888",
     },
   });
 
-  // Dueño de la marca (ADMIN / builder)
+  // Dueña (builder) — el nombre del placeholder del sitio
   await upsertUser({
-    email: "admin@kiku.com",
-    passwordHash: hash("kiku1234"),
-    name: "Dueño Kiku",
+    email: "dueno@laesquina.cr",
+    passwordHash: hash("esquina123"),
+    name: "María Rodríguez",
     role: "ADMIN",
     tenantId: tenant.id,
     emailVerified: true,
   });
 
-  // Cajero (STAFF)
+  // Cajero (staff)
   await upsertUser({
-    email: "caja@kiku.com",
-    passwordHash: hash("caja1234"),
-    name: "Cajero Kiku",
+    email: "caja@laesquina.cr",
+    passwordHash: hash("caja12345"),
+    name: "Diego Campos",
     role: "STAFF",
     tenantId: tenant.id,
     emailVerified: true,
   });
 
-  // Cliente final (CUSTOMER) verificado
-  const customer = await upsertUser({
-    email: "cliente@kiku.com",
-    passwordHash: hash("cliente1234"),
-    name: "Cliente Demo",
-    role: "CUSTOMER",
-    emailVerified: true,
-  });
-
-  // Programa con codigo fijo para testear
+  // Programa con codigo fijo para inscribirse
   let program = await prisma.program.findFirst({ where: { tenantId: tenant.id } });
   if (!program) {
     program = await prisma.program.create({
       data: {
-        code: "KIKU10",
+        code: "CAFE10",
         tenantId: tenant.id,
-        name: "Cafe Gratis #10",
-        description: "Junta 10 sellos y llevate un cafe gratis.",
+        name: "Café Gratis #10",
+        description: "Juntá 10 sellos y el siguiente café va por la casa.",
         type: "STAMP",
         goal: 10,
-        rewardText: "1 cafe gratis",
+        rewardText: "1 café gratis",
         emoji: "☕",
         active: true,
       },
     });
   }
 
-  // Tarjeta del cliente con 4 sellos (para ver el QR y el progreso)
-  const existing = await prisma.card.findUnique({
-    where: { programId_userId: { programId: program.id, userId: customer.id } },
-  });
-  if (!existing) {
-    await prisma.card.create({
-      data: { programId: program.id, userId: customer.id, token: cardToken(), balance: 4 },
+  // Clientes finales con progreso variado (para que el panel se vea vivo).
+  // El principal lleva 7/10 — igual que el boleto del hero del sitio.
+  const CUSTOMERS = [
+    { email: "cliente@demo.cr", password: "cliente123", name: "Juan Pérez", balance: 7 },
+    { email: "ana@correo.cr", password: "cliente123", name: "Ana Solís", balance: 4 },
+    { email: "luis@correo.cr", password: "cliente123", name: "Luis Vargas", balance: 10 }, // lista para canje
+  ];
+  for (const c of CUSTOMERS) {
+    const user = await upsertUser({
+      email: c.email,
+      passwordHash: hash(c.password),
+      name: c.name,
+      role: "CUSTOMER",
+      emailVerified: true,
     });
+    const existing = await prisma.card.findUnique({
+      where: { programId_userId: { programId: program.id, userId: user.id } },
+    });
+    if (!existing) {
+      const completed = c.balance >= program.goal;
+      await prisma.card.create({
+        data: {
+          programId: program.id,
+          userId: user.id,
+          token: cardToken(),
+          balance: c.balance,
+          status: completed ? "COMPLETED" : "ACTIVE",
+          completedAt: completed ? new Date() : null,
+        },
+      });
+    }
   }
 
-  console.log("\n=== ACCESOS DE PRUEBA ===");
-  console.log("SUPERADMIN (Movix):  dueno@movix.com   / movix1234");
-  console.log("DUEÑO/BUILDER Kiku:  admin@kiku.com    / kiku1234");
-  console.log("CAJERO Kiku (STAFF): caja@kiku.com     / caja1234");
-  console.log("CLIENTE Kiku:        cliente@kiku.com  / cliente1234");
-  console.log("CODIGO DE PROGRAMA:  KIKU10");
-  console.log("=========================\n");
+  console.log("\n=== ACCESOS DE DEMOSTRACION ===");
+  console.log("MOVIX (operador):    dueno@movix.com     / movix1234");
+  console.log("DUEÑA del comercio:  dueno@laesquina.cr  / esquina123");
+  console.log("CAJA (staff):        caja@laesquina.cr   / caja12345");
+  console.log("CLIENTE final:       cliente@demo.cr     / cliente123");
+  console.log("CODIGO DE PROGRAMA:  CAFE10");
+  console.log("================================\n");
 }
 
 main()

@@ -42,23 +42,26 @@ npm run dev                   # -> http://localhost:5173
 ```
 El frontend hace proxy de `/api` al backend, así que no hay líos de CORS en dev.
 
-## 4. Accesos de prueba (seed)
-| Rol                | Correo            | Contraseña   |
-|--------------------|-------------------|--------------|
-| SUPERADMIN (Movix) | dueno@movix.com   | movix1234    |
-| Dueño / Builder    | admin@kiku.com    | kiku1234     |
-| Cajero (Staff)     | caja@kiku.com     | caja1234     |
-| Cliente            | cliente@kiku.com  | cliente1234  |
+## 4. Accesos de demostración (seed)
+Entorno de demo 100% ficticio — el comercio es "Cafetería La Esquina" (plan ACTIVE, nunca expira).
 
-**Código de programa para inscribir clientes:** `KIKU10`
+| Rol                 | Correo              | Contraseña  |
+|---------------------|---------------------|-------------|
+| Movix (operador)    | dueno@movix.com     | movix1234   |
+| Dueña del comercio  | dueno@laesquina.cr  | esquina123  |
+| Caja (staff)        | caja@laesquina.cr   | caja12345   |
+| Cliente final       | cliente@demo.cr     | cliente123  |
+
+**Código de programa para inscribir clientes:** `CAFE10`
 
 Todos los usuarios del seed ya vienen verificados. Los que crees nuevos desde la web
 reciben un código de verificación (en modo demo aparece en pantalla y en la consola del server).
+El seed también crea clientes extra (Ana 4/10, Luis 10/10 lista para canje) para que el panel se vea vivo.
 
 **Flujos para probar:**
-- **Builder (dueño):** entrá con `admin@kiku.com` → *Resumen* (stats), *Programas* (creá/editá, copiá el código), *Marca* (logo, colores, emoji, soporte), *Escanear*.
-- **Cliente:** entrá con `cliente@kiku.com` → mostrá tu QR. O registrá uno nuevo desde "Soy cliente" → verificá el correo → inscribite con `KIKU10`.
-- **Escaneo:** con `caja@kiku.com` o el admin → *Escanear* → cámara o pegá el token → *Sumar sello* → al llegar a 10, *Canjear*.
+- **Builder (dueño):** entrá con `dueno@laesquina.cr` → *Resumen* (stats), *Programas* (creá/editá, copiá el código), *Marca* (logo, colores, emoji, soporte), *Escanear*, *Reportes*.
+- **Cliente:** entrá con `cliente@demo.cr` → mostrá tu QR (7/10, igual que el hero del sitio). O registrá uno nuevo desde "Soy cliente" → verificá el correo → inscribite con `CAFE10`.
+- **Escaneo:** con `caja@laesquina.cr` o la dueña → *Escanear* → cámara o pegá el token → *Sumar sello* → al llegar a 10, *Canjear*.
 - **Prueba de 3 días:** en la landing → "Probar gratis 3 días" → creás una marca nueva con su espacio aislado.
 - **Movix (vos):** entrá con `dueno@movix.com` → ves TODAS las marcas y dónde queda almacenado cada usuario.
 
