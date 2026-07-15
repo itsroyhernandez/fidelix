@@ -309,6 +309,25 @@ h1, h2, h3 { font-family: var(--display); }
 .trial-banner { background: var(--brick); color: #fdf6ec; text-align: center; padding: 9px; font-size: 14px; }
 .trial-banner.expired { background: #5a1e1a; }
 
+/* Barra de impersonación del operador */
+.op-banner {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: var(--bronze); color: #241a00; padding: 8px 12px; font-size: 14px;
+}
+.op-banner .btn { border-color: rgba(0,0,0,.35); color: #241a00; }
+
+/* Panel Movix: operación */
+.op-actions { margin-top: 8px; flex-wrap: wrap; gap: 6px; }
+.ok-line { border-color: var(--pine) !important; color: #8fdcb2 !important; }
+.danger-line { border-color: #7a2c24 !important; color: #ff9d9d !important; }
+.mrr-row { display: flex; gap: 40px; flex-wrap: wrap; margin: 8px 0; }
+.mrr-big { font-family: var(--mono); font-size: 38px; font-weight: 600; color: var(--pine); line-height: 1.1; }
+.mrr-big.muted-num { color: var(--bronze); }
+.mrr-inline { font-family: var(--mono); color: var(--pine); }
+.sel-sm { padding: 6px 8px; font-size: 13px; width: auto; }
+.mono { font-family: var(--mono); }
+.tblwrap-dark { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 14px 10px; }
+
 /* ==========================================================================
    FIDELIX — landing publica. Identidad: un sello de tinta real sobre boleto.
    Todo el contenido vive en .stage; los overlays son hermanos de .stage,

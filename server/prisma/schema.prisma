@@ -19,6 +19,7 @@ model Tenant {
   slug         String    @unique
   // --- Plan / prueba de 3 dias ---
   plan         String    @default("TRIAL") // TRIAL | ACTIVE | EXPIRED
+  planTier     String    @default("START") // START | PULSE | HYPER (tarifa contratada)
   trialEndsAt  DateTime?
   // --- Personalizacion (branding) que hace el dueño ---
   logo         String    @default("") // URL o dataURL del logo

@@ -38,9 +38,28 @@ export default function App() {
   }
   function logout() {
     auth.token = null;
+    localStorage.removeItem("fidelix_op_token");
+    localStorage.removeItem("fidelix_op_brand");
     setUser(null);
     setTenant(null);
     setDevCode(null);
+  }
+
+  // --- Impersonación del operador: entrar a una marca como su dueño ---
+  const impersonating = localStorage.getItem("fidelix_op_token") ? localStorage.getItem("fidelix_op_brand") : null;
+  function impersonate(token, brandName) {
+    localStorage.setItem("fidelix_op_token", auth.token); // guardar la sesión Movix
+    localStorage.setItem("fidelix_op_brand", brandName);
+    auth.token = token;
+    setLoading(true);
+    refresh();
+  }
+  function backToMovix() {
+    auth.token = localStorage.getItem("fidelix_op_token");
+    localStorage.removeItem("fidelix_op_token");
+    localStorage.removeItem("fidelix_op_brand");
+    setLoading(true);
+    refresh();
   }
 
   if (loading) return <div className="center muted">Cargando…</div>;
@@ -84,10 +103,16 @@ export default function App() {
         </div>
       </header>
 
+      {impersonating && (
+        <div className="op-banner">
+          👁 Viendo como dueño de <b>{impersonating}</b>
+          <button className="btn ghost sm" onClick={backToMovix}>Volver a Movix</button>
+        </div>
+      )}
       {trialBanner}
 
       <main className="content">
-        {user.role === "SUPERADMIN" && <SuperDashboard />}
+        {user.role === "SUPERADMIN" && <SuperDashboard onImpersonate={impersonate} />}
         {user.role === "ADMIN" && <AdminView tenant={tenant} onTenant={setTenant} />}
         {user.role === "STAFF" && <ScanPanel />}
         {user.role === "CUSTOMER" && <CustomerView />}
