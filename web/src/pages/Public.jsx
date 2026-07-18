@@ -96,8 +96,8 @@ export default function Public({ onAuthed }) {
   );
 }
 
-// TODO(Movix): numero real de WhatsApp del negocio.
-const WHATSAPP = "50688888888";
+// Numero real de WhatsApp de Movix (formato wa.me, sin "+").
+const WHATSAPP = "50670863466";
 
 function WhatsAppFab() {
   return (
