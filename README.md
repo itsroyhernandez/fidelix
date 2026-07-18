@@ -23,7 +23,7 @@ Desarrollada por **Movix** (la atribución "by Movix" va al final, nunca pegada 
 ---
 
 ## 1. Requisitos
-- Node.js 18+ (incluye npm). Verificá con `node -v`.
+- Node.js 20+ (incluye npm; lo pide `node-cron`). Verificá con `node -v`.
 
 ## 2. Arrancar el backend (API)
 ```bash

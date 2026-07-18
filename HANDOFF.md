@@ -38,7 +38,7 @@ fidelix/
 
 ## 3. Cómo correrlo
 
-**Requisito:** Node 18+. Nunca abrir `index.html` directo ni con Live Server — es React, necesita Vite.
+**Requisito:** Node 20+ (lo pide `node-cron`). Nunca abrir `index.html` directo ni con Live Server — es React, necesita Vite.
 
 ```bash
 # Backend
