@@ -9,6 +9,7 @@ const walletRoutes = require("./routes/wallet");
 const superadminRoutes = require("./routes/superadmin");
 const oauthRoutes = require("./routes/oauth");
 const { router: paymentRoutes } = require("./routes/payments");
+const { botRouter } = require("./bot");
 
 function createApp() {
   const app = express();
@@ -25,6 +26,7 @@ function createApp() {
   app.use("/api/loyalty", loyaltyRoutes);
   app.use("/api/wallet", walletRoutes);
   app.use("/api/super", superadminRoutes);
+  app.use("/api/bot", botRouter);
 
   // 404
   app.use((req, res) => res.status(404).json({ error: "Recurso no encontrado" }));

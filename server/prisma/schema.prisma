@@ -54,6 +54,7 @@ model User {
 
   cards        Card[]
   transactions Transaction[] @relation("StaffTransactions")
+  channels     ChannelIdentity[]
 
   @@index([tenantId])
   @@index([role])
@@ -128,4 +129,57 @@ model Redemption {
   createdAt DateTime @default(now())
 
   @@index([cardId])
+}
+
+// ---------------------------------------------------------------------------
+// Chatbot omnicanal (WhatsApp hoy; Messenger/Instagram/TikTok despues).
+// El nucleo es AGNOSTICO de canal: cada red se mapea a estos modelos.
+// ---------------------------------------------------------------------------
+
+// Identidad de una persona en un canal (ej: un numero de WhatsApp).
+// Es el puente entre el "quien escribe" externo y el User de Fidelix.
+model ChannelIdentity {
+  id          String   @id @default(cuid())
+  channel     String   // whatsapp | messenger | instagram | tiktok
+  externalId  String   // wa_id (telefono), PSID de Messenger, etc.
+  userId      String?  // User de Fidelix vinculado (cliente o comercio), si ya se identifico
+  user        User?    @relation(fields: [userId], references: [id])
+  displayName String   @default("") // nombre de perfil que reporta el canal
+  botRole     String   @default("GUEST") // GUEST | CUSTOMER | MERCHANT (rol cacheado en el chat)
+  optIn       Boolean  @default(false)   // consentimiento para recibir mensajes proactivos (plantillas)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  session  BotSession?
+  messages BotMessage[]
+
+  @@unique([channel, externalId])
+  @@index([userId])
+}
+
+// Estado vivo de la conversacion (que flujo, en que paso, datos temporales).
+model BotSession {
+  id            String    @id @default(cuid())
+  identityId    String    @unique
+  identity      ChannelIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  flow          String    @default("") // flujo actual ("" = inactivo/idle)
+  step          String    @default("") // paso dentro del flujo
+  data          String    @default("{}") // blob JSON con datos del flujo en curso
+  lastInboundAt DateTime? // ultimo mensaje del usuario -> ventana de servicio de 24h de WhatsApp
+  updatedAt     DateTime  @updatedAt
+}
+
+// Bitacora de mensajes (entrantes y salientes) para depuracion y calidad.
+model BotMessage {
+  id         String   @id @default(cuid())
+  identityId String
+  identity   ChannelIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  channel    String
+  direction  String   // in | out
+  text       String   @default("")
+  meta       String   @default("{}") // JSON: tipo, ids del canal, intent detectado, etc.
+  createdAt  DateTime @default(now())
+
+  @@index([identityId])
+  @@index([createdAt])
 }

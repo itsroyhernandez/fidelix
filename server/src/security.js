@@ -25,7 +25,16 @@ function applySecurity(app) {
   );
 
   // Limite de tamaño de payload (anti-DoS por cuerpos gigantes).
-  app.use(require("express").json({ limit: "100kb" }));
+  // Guardamos el cuerpo crudo (rawBody) para poder verificar la firma HMAC del
+  // webhook de WhatsApp/Meta (X-Hub-Signature-256), que se calcula sobre los bytes exactos.
+  app.use(
+    require("express").json({
+      limit: "100kb",
+      verify: (req, res, buf) => {
+        req.rawBody = buf;
+      },
+    })
+  );
 
   // Rate limit global: frena fuerza bruta / abuso.
   app.use(
