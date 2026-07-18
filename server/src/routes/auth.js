@@ -23,7 +23,7 @@ function publicUser(u) {
 
 // Registro de cliente final (CUSTOMER). Genera codigo de verificacion.
 router.post("/register", authLimiter, validate("register"), async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, birthDate } = req.body;
   const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) return res.status(409).json({ error: "Ese correo ya esta registrado" });
 
@@ -35,6 +35,7 @@ router.post("/register", authLimiter, validate("register"), async (req, res) => 
       passwordHash,
       name,
       role: "CUSTOMER",
+      birthDate: birthDate ? new Date(birthDate) : null,
       verifyCode: code,
       verifyExpires: new Date(Date.now() + 30 * 60 * 1000),
     },

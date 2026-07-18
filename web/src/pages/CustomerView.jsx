@@ -73,6 +73,7 @@ function LoyaltyCard({ card, onShowQr }) {
   const done = card.status === "COMPLETED";
   const redeemed = card.status === "REDEEMED";
   const missing = Math.max(goal - card.balance, 0);
+  const isBirthday = card.program.type === "BIRTHDAY";
   const unit = card.program.type === "STAMP" ? "sello" : "punto";
 
   return (
@@ -85,7 +86,7 @@ function LoyaltyCard({ card, onShowQr }) {
             <div className="lc-reward">🎁 {card.program.rewardText}</div>
           </div>
           <span className={`badge ${done ? "ok" : redeemed ? "muted-badge" : ""}`}>
-            {redeemed ? "Canjeada" : done ? "¡Lista!" : card.program.type === "STAMP" ? "Sellos" : "Puntos"}
+            {redeemed ? "Canjeada" : done ? "¡Lista!" : isBirthday ? "Cumpleaños" : card.program.type === "STAMP" ? "Sellos" : "Puntos"}
           </span>
         </div>
 
@@ -101,6 +102,8 @@ function LoyaltyCard({ card, onShowQr }) {
               </span>
             ))}
           </div>
+        ) : isBirthday ? (
+          <div style={{ textAlign: "center", fontSize: 40, margin: "10px 0" }}>🎂</div>
         ) : (
           <div className="progress">
             <div className="progress-bar anim" style={{ width: `${pct}%` }} />
@@ -111,7 +114,11 @@ function LoyaltyCard({ card, onShowQr }) {
         {/* Microcopy que empuja a la meta */}
         {!redeemed && (
           <p className="lc-missing">
-            {done
+            {isBirthday
+              ? done
+                ? "¡Feliz cumpleaños! Mostrá esta tarjeta en caja para canjear tu premio."
+                : "Este premio se activa solo el día de tu cumpleaños."
+              : done
               ? "¡Meta cumplida! Mostrala en caja para canjear tu premio."
               : missing <= 2
               ? `¡Ya casi! Te ${missing === 1 ? "falta 1" : `faltan ${missing}`} ${unit}${missing === 1 ? "" : "s"}.`

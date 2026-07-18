@@ -2,6 +2,13 @@ const { z } = require("zod");
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Color hex invalido");
 
+// Fecha (YYYY-MM-DD, la que da un <input type="date">). Opcional en todos lados.
+const birthDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha invalida")
+  .refine((v) => !Number.isNaN(new Date(v).getTime()), "Fecha invalida")
+  .optional();
+
 // Regla de contraseña: 8-200, al menos una letra Y un numero, sin espacios,
 // sin comas y sin emojis. Minusculas permitidas.
 const EMOJI = /\p{Extended_Pictographic}/u;
@@ -21,6 +28,7 @@ const schemas = {
     email: z.string().email().max(160),
     password,
     name: z.string().min(1).max(120),
+    birthDate,
   }),
   login: z.object({
     email: z.string().email().max(160),
@@ -49,7 +57,7 @@ const schemas = {
   program: z.object({
     name: z.string().min(1).max(120),
     description: z.string().max(500).optional().default(""),
-    type: z.enum(["STAMP", "POINTS"]).default("STAMP"),
+    type: z.enum(["STAMP", "POINTS", "BIRTHDAY"]).default("STAMP"),
     goal: z.number().int().min(1).max(1000).default(10),
     rewardText: z.string().min(1).max(200).default("Recompensa gratis"),
     emoji: z.string().max(8).optional().default("⭐"),
@@ -62,6 +70,7 @@ const schemas = {
     name: z.string().min(1).max(120),
     email: z.string().email().max(160),
     balance: z.number().int().min(0).max(1000).optional().default(0),
+    birthDate,
   }),
   scan: z.object({
     token: z.string().min(8).max(80),

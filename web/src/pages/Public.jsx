@@ -232,7 +232,7 @@ function Hero({ setPanel }) {
 
 // Cinta de recompensas en movimiento (como papel saliendo de una impresora de tickets).
 const REWARDS = [
-  "1 café gratis", "La 10ª pizza va por la casa", "Corte #8 sin costo", "2x1 los martes",
+  "1 café gratis", "La 10ª pizza va por la casa", "Corte #8 sin costo", "10ª clase gratis",
   "Postre gratis en tu cumple", "Envío gratis al 5º pedido", "Manicure #6 gratis", "Bebida grande al 7º combo",
 ];
 function RewardMarquee() {
@@ -520,7 +520,7 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
   // Cerrar solo si el CLIC EMPEZO en el fondo: arrastrar una seleccion de texto
   // desde un input y soltar afuera NO debe cerrar el modal (perderias lo escrito).
   const downOnBackdrop = useRef(false);
-  const [form, setForm] = useState({ brandName: "", ownerName: "", name: "", email: "", password: "", phone: "" });
+  const [form, setForm] = useState({ brandName: "", ownerName: "", name: "", email: "", password: "", phone: "", birthDate: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [oauthMsg, setOauthMsg] = useState("");
@@ -558,7 +558,10 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
       if (mode === "login") {
         data = await api("/auth/login", { method: "POST", body: { email: form.email, password: form.password } });
       } else if (mode === "customer") {
-        data = await api("/auth/register", { method: "POST", body: { name: form.name, email: form.email, password: form.password } });
+        data = await api("/auth/register", {
+          method: "POST",
+          body: { name: form.name, email: form.email, password: form.password, birthDate: form.birthDate || undefined },
+        });
       } else {
         data = await api("/tenants/signup", {
           method: "POST",
@@ -626,7 +629,11 @@ function AuthModal({ mode, setMode, onClose, onAuthed }) {
             </>
           )}
           {mode === "customer" && (
-            <input className="input" placeholder={PLACEHOLDERS.name} value={form.name} onChange={set("name")} {...eyes("name")} required />
+            <>
+              <input className="input" placeholder={PLACEHOLDERS.name} value={form.name} onChange={set("name")} {...eyes("name")} required />
+              <div className="muted tiny" style={{ marginTop: -6 }}>Cumpleaños (opcional, para premios especiales 🎂)</div>
+              <input className="input" type="date" value={form.birthDate} onChange={set("birthDate")} {...eyes("birthDate")} />
+            </>
           )}
           <input className="input" type="email" placeholder={PLACEHOLDERS.email} value={form.email} onChange={set("email")} {...eyes("email")} required />
           <div className="pw-field">

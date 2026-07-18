@@ -100,7 +100,8 @@ function Programs() {
               {p.emoji} {p.name} {!p.active && <span className="muted tiny">(inactivo)</span>}
             </div>
             <div className="muted tiny">
-              {p.type === "STAMP" ? "Sellos" : "Puntos"} · meta {p.goal} · 🎁 {p.rewardText}
+              {p.type === "STAMP" ? "Sellos" : p.type === "BIRTHDAY" ? "Cumpleaños 🎂" : "Puntos"}
+              {p.type !== "BIRTHDAY" ? ` · meta ${p.goal}` : ""} · 🎁 {p.rewardText}
             </div>
             <button className="code-chip" onClick={() => copyCode(p.code)} title="Copiar código">
               Código: <b>{p.code}</b> {copied === p.code ? "✓ copiado" : "⧉"}
@@ -167,7 +168,7 @@ function Programs() {
 // Alta manual de un cliente (walk-in en el mostrador).
 function AddCustomer({ program, onAdded }) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", balance: 0 });
+  const [form, setForm] = useState({ name: "", email: "", balance: 0, birthDate: "" });
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -180,10 +181,15 @@ function AddCustomer({ program, onAdded }) {
     try {
       const d = await api(`/programs/${program.id}/customers`, {
         method: "POST",
-        body: { name: form.name, email: form.email.trim(), balance: Number(form.balance) || 0 },
+        body: {
+          name: form.name,
+          email: form.email.trim(),
+          balance: Number(form.balance) || 0,
+          birthDate: form.birthDate || undefined,
+        },
       });
       setResult(d);
-      setForm({ name: "", email: "", balance: 0 });
+      setForm({ name: "", email: "", balance: 0, birthDate: "" });
       onAdded?.();
     } catch (err) {
       setError(err.message);
@@ -231,6 +237,9 @@ function AddCustomer({ program, onAdded }) {
       </div>
       <div className="row">
         <input className="input" type="number" min="0" max={program.goal} placeholder="Sellos iniciales (0)" value={form.balance} onChange={set("balance")} />
+        <input className="input" type="date" title="Cumpleaños (opcional)" value={form.birthDate} onChange={set("birthDate")} />
+      </div>
+      <div className="row">
         <button className="btn primary" disabled={busy}>{busy ? "…" : "Agregar"}</button>
         <button type="button" className="btn ghost" onClick={() => setOpen(false)}>Cancelar</button>
       </div>
@@ -239,7 +248,7 @@ function AddCustomer({ program, onAdded }) {
   );
 }
 
-const EMOJIS = ["⭐", "☕", "🍰", "🍔", "🍕", "🍦", "🍩", "🌮", "🎁", "💈", "💅", "🎀"];
+const EMOJIS = ["⭐", "☕", "🍰", "🍔", "🍕", "🍦", "🍩", "🌮", "🎁", "💈", "💅", "🎀", "🎂"];
 
 function ProgramForm({ initial, onCancel, onSave }) {
   const [f, setF] = useState({ ...initial });
@@ -257,14 +266,33 @@ function ProgramForm({ initial, onCancel, onSave }) {
         <div className="row">
           <div className="col">
             <label className="label">Tipo</label>
-            <select className="input" value={f.type} onChange={set("type")}>
+            <select
+              className="input"
+              value={f.type}
+              onChange={(e) => {
+                const type = e.target.value;
+                setF({ ...f, type, goal: type === "BIRTHDAY" ? 1 : f.goal === 1 ? 10 : f.goal });
+              }}
+            >
               <option value="STAMP">Sellos</option>
               <option value="POINTS">Puntos</option>
+              <option value="BIRTHDAY">Cumpleaños</option>
             </select>
           </div>
           <div className="col">
-            <label className="label">Meta</label>
-            <input className="input" type="number" min="1" value={f.goal} onChange={set("goal")} />
+            {f.type === "BIRTHDAY" ? (
+              <>
+                <label className="label">Meta</label>
+                <div className="muted tiny" style={{ marginTop: 10 }}>
+                  Se activa sola el día del cumpleaños del cliente 🎂
+                </div>
+              </>
+            ) : (
+              <>
+                <label className="label">Meta</label>
+                <input className="input" type="number" min="1" value={f.goal} onChange={set("goal")} />
+              </>
+            )}
           </div>
         </div>
 

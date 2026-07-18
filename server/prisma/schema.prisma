@@ -51,12 +51,15 @@ model User {
   verifyCode    String?
   verifyExpires DateTime?
   createdAt     DateTime  @default(now())
+  // Fecha de nacimiento (opcional) -> dispara el premio de un programa tipo BIRTHDAY.
+  birthDate     DateTime?
 
   cards        Card[]
   transactions Transaction[] @relation("StaffTransactions")
   channels     ChannelIdentity[]
 
   @@index([tenantId])
+  @@index([birthDate])
   @@index([role])
 }
 
@@ -68,7 +71,7 @@ model Program {
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
   name        String
   description String   @default("")
-  type        String   @default("STAMP") // STAMP (sellos) | POINTS (puntos)
+  type        String   @default("STAMP") // STAMP (sellos) | POINTS (puntos) | BIRTHDAY (premio anual de cumpleanos, goal=1)
   goal        Int      @default(10)
   rewardText  String   @default("Recompensa gratis")
   emoji       String   @default("⭐")

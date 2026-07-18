@@ -8,6 +8,7 @@
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 const { cardToken } = require("../src/util");
+const { grantBirthdayRewards } = require("../src/jobs/birthdays");
 
 const prisma = new PrismaClient();
 const hash = (p) => bcrypt.hashSync(p, 12);
@@ -64,7 +65,7 @@ async function main() {
   });
 
   // Programa con codigo fijo para inscribirse
-  let program = await prisma.program.findFirst({ where: { tenantId: tenant.id } });
+  let program = await prisma.program.findFirst({ where: { tenantId: tenant.id, type: "STAMP" } });
   if (!program) {
     program = await prisma.program.create({
       data: {
@@ -81,10 +82,32 @@ async function main() {
     });
   }
 
+  // Programa de cumpleaños (demo). Codigo fijo aparte del de sellos.
+  let birthdayProgram = await prisma.program.findFirst({ where: { tenantId: tenant.id, type: "BIRTHDAY" } });
+  if (!birthdayProgram) {
+    birthdayProgram = await prisma.program.create({
+      data: {
+        code: "CAFECUMPLE",
+        tenantId: tenant.id,
+        name: "Cumple La Esquina",
+        description: "Un postre gratis el día de tu cumpleaños.",
+        type: "BIRTHDAY",
+        goal: 1,
+        rewardText: "Postre gratis en tu cumple",
+        emoji: "🎂",
+        active: true,
+      },
+    });
+  }
+
   // Clientes finales con progreso variado (para que el panel se vea vivo).
-  // El principal lleva 7/10 — igual que el boleto del hero del sitio.
+  // El principal lleva 7/10 — igual que el boleto del hero del sitio. Su cumpleaños
+  // se fija en HOY (mes/dia dinamico, año demo) para que el premio de cumpleaños
+  // siempre se pueda mostrar en vivo, sin importar que dia se corra el seed.
+  const today = new Date();
+  const juanBirthDate = new Date(today.getFullYear() - 29, today.getMonth(), today.getDate());
   const CUSTOMERS = [
-    { email: "cliente@demo.cr", password: "cliente123", name: "Juan Pérez", balance: 7 },
+    { email: "cliente@demo.cr", password: "cliente123", name: "Juan Pérez", balance: 7, birthDate: juanBirthDate },
     { email: "ana@correo.cr", password: "cliente123", name: "Ana Solís", balance: 4 },
     { email: "luis@correo.cr", password: "cliente123", name: "Luis Vargas", balance: 10 }, // lista para canje
   ];
@@ -95,7 +118,13 @@ async function main() {
       name: c.name,
       role: "CUSTOMER",
       emailVerified: true,
+      birthDate: c.birthDate || null,
     });
+    // Si el birthDate no se seteo por ser un upsert existente (update:{} no lo toca), lo forzamos.
+    if (c.birthDate) {
+      await prisma.user.update({ where: { id: user.id }, data: { birthDate: c.birthDate } });
+    }
+
     const existing = await prisma.card.findUnique({
       where: { programId_userId: { programId: program.id, userId: user.id } },
     });
@@ -114,12 +143,29 @@ async function main() {
     }
   }
 
+  // Inscribe a Juan tambien en el programa de cumpleaños (si no estaba ya).
+  const juan = await prisma.user.findUnique({ where: { email: "cliente@demo.cr" } });
+  const juanBirthdayCard = await prisma.card.findUnique({
+    where: { programId_userId: { programId: birthdayProgram.id, userId: juan.id } },
+  });
+  if (!juanBirthdayCard) {
+    await prisma.card.create({
+      data: { programId: birthdayProgram.id, userId: juan.id, token: cardToken(), balance: 0, status: "ACTIVE" },
+    });
+  }
+
+  // Corre el otorgamiento de cumpleaños una vez: como el de Juan es HOY, su
+  // tarjeta de cumpleaños queda lista para canjear apenas se termina de sembrar.
+  const { granted } = await grantBirthdayRewards();
+
   console.log("\n=== ACCESOS DE DEMOSTRACION ===");
   console.log("MOVIX (operador):    dueno@movix.com     / movix1234");
   console.log("DUEÑA del comercio:  dueno@laesquina.cr  / esquina123");
   console.log("CAJA (staff):        caja@laesquina.cr   / caja12345");
   console.log("CLIENTE final:       cliente@demo.cr     / cliente123");
   console.log("CODIGO DE PROGRAMA:  CAFE10");
+  console.log("CODIGO CUMPLEAÑOS:   CAFECUMPLE");
+  console.log(`PREMIOS DE CUMPLE OTORGADOS HOY: ${granted}`);
   console.log("================================\n");
 }
 
@@ -128,4 +174,8 @@ main()
     console.error(e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+    // grantBirthdayRewards usa su propio cliente compartido (src/prisma.js); cerrarlo tambien.
+    await require("../src/prisma").prisma.$disconnect();
+  });

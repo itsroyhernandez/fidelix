@@ -2,6 +2,7 @@ const { createApp } = require("./app");
 const { env } = require("./env");
 const { schedulePurge } = require("./jobs/purge");
 const { scheduleMonthlyReports } = require("./jobs/reports");
+const { scheduleBirthdays } = require("./jobs/birthdays");
 
 const app = createApp();
 
@@ -10,4 +11,5 @@ app.listen(env.port, () => {
   console.log(`  Salud      ->  http://localhost:${env.port}/api/health\n`);
   schedulePurge(); // job de depuracion diaria
   scheduleMonthlyReports(); // reportes mensuales por marca
+  scheduleBirthdays(); // premios de cumpleanos
 });

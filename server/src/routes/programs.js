@@ -33,9 +33,11 @@ router.post("/", validate("program"), async (req, res) => {
       name: b.name,
       description: b.description,
       type: b.type,
-      goal: b.goal,
+      // BIRTHDAY es un premio anual de "todo o nada": la meta siempre es 1
+      // (el cron lo completa automaticamente el dia del cumpleanos del cliente).
+      goal: b.type === "BIRTHDAY" ? 1 : b.goal,
       rewardText: b.rewardText,
-      emoji: b.emoji || "⭐",
+      emoji: b.emoji || (b.type === "BIRTHDAY" ? "🎂" : "⭐"),
       active: b.active,
     },
   });
@@ -55,7 +57,7 @@ router.put("/:id", validate("program"), async (req, res) => {
       name: b.name,
       description: b.description,
       type: b.type,
-      goal: b.goal,
+      goal: b.type === "BIRTHDAY" ? 1 : b.goal,
       rewardText: b.rewardText,
       emoji: b.emoji || owned.emoji,
       active: b.active,
@@ -123,6 +125,7 @@ router.post("/:id/customers", validate("addCustomer"), async (req, res) => {
           passwordHash: await bcrypt.hash(tempPassword, 12),
           role: "CUSTOMER",
           emailVerified: true, // el comercio da fe
+          birthDate: req.body.birthDate ? new Date(req.body.birthDate) : null,
         },
       });
     }
