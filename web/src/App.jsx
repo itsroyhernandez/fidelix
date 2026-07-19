@@ -7,7 +7,7 @@ import AdminView from "./pages/AdminView.jsx";
 import ScanPanel from "./pages/ScanPanel.jsx";
 import SuperDashboard from "./pages/SuperDashboard.jsx";
 import Footer from "./components/Footer.jsx";
-import Seal from "./components/Seal.jsx";
+import Ticket from "./components/Ticket.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -92,7 +92,7 @@ export default function App() {
   return (
     <div className="app" style={brandStyle}>
       <header className="topbar">
-        <span className="brand"><Seal size={22} /> Fidelix</span>
+        <span className="brand"><Ticket size={22} /> Fidelix</span>
         <div className="topbar-right">
           <span className="muted hide-sm">
             {user.name} · <span className="role">{roleLabel(user.role)}</span>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, auth } from "../api.js";
 import { useReveal } from "../hooks/useReveal.js";
 import Seal from "../components/Seal.jsx";
+import Ticket from "../components/Ticket.jsx";
 import Privacy from "./Privacy.jsx";
 import { GoogleLogo, AppleLogo, MicrosoftLogo } from "../components/BrandLogos.jsx";
 import SealBuddy from "../components/SealBuddy.jsx";
@@ -53,7 +54,7 @@ export default function Public({ onAuthed }) {
 
         <nav className="nav">
           <div className="logo">
-            <Seal size={34} />
+            <Ticket size={34} />
             <span className="logo-text">Fidelix</span>
           </div>
           <div className="nav-actions">
@@ -77,7 +78,7 @@ export default function Public({ onAuthed }) {
 
         <footer className="footer-v2">
           <div className="logo">
-            <Seal size={26} />
+            <Ticket size={26} />
             <span className="logo-text">Fidelix <em>by Movix</em></span>
           </div>
           <div className="footer-links">

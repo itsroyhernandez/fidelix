@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "../api.js";
 import Footer from "../components/Footer.jsx";
-import Seal from "../components/Seal.jsx";
+import Ticket from "../components/Ticket.jsx";
 
 // Pantalla de verificacion de correo por codigo de 6 digitos.
 export default function Verify({ user, devCode, onVerified, onDevCode, onLogout }) {
@@ -39,7 +39,7 @@ export default function Verify({ user, devCode, onVerified, onDevCode, onLogout 
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <div className="brand big"><Seal size={38} /> Fidelix</div>
+        <div className="brand big"><Ticket size={38} /> Fidelix</div>
         <h3>Verificá tu correo</h3>
         <p className="muted">
           Enviamos un código de 6 dígitos a <b>{user.email}</b>. Escribilo para confirmar que sos vos.
